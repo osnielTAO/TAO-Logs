@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">TAO logs</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="contentDescrip">BackgroundImage</string>
+    <string name="login">Login</string>
+    <string name="userfinger">Use your fingerprint to login</string>
+    <string name="cancel">Cancel</string>
 </resources>
