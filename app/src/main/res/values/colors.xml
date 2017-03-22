@@ -19,4 +19,9 @@
     <!--Secondary Color Palette-->
     <color name="white">#ffffff</color>
     <color name="black">#231f20</color>
+
+    <!--Fingerprint dialog colors-->
+    <color name="warning_color">#f4511e</color>
+    <color name='hint_color'>#42000000</color>
+    <color name='success_color'>#009688</color>
 </resources>

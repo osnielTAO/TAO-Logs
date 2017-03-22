@@ -1,26 +1,23 @@
 package com.logs.tao.taologs;
 
 import android.Manifest;
-import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.content.Context;
-import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
-import android.os.CancellationSignal;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -51,7 +48,11 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
     private FingerprintManager.CryptoObject cryptoObject;
     private int permissionGranted;
     private FloatingActionButton mFAB;
+    static final String DEFAULT_KEY_NAME = "default_key";
+    private boolean useFingerprint;
 
+    private SharedPreferences mSharedPreferences;
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,7 +60,10 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
 
         getSupportActionBar().hide();
         mFAB = (FloatingActionButton) findViewById(R.id.fingerprintReader);
-
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        useFingerprint = mSharedPreferences.getBoolean(getString(R.string.use_fingerprint_to_authenticate_key), false);
+        if(useFingerprint)
+            startAuthentication(mFAB.findFocus());
         keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -79,15 +83,15 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
         }
     }
 
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void startAuthentication(View v) {
         generateKey();
         if (cipherInit()) {
             cryptoObject = new FingerprintManager.CryptoObject(cipher);
-            FingerprintHandler helper = new FingerprintHandler(this);
-            helper.startAuth(fingerprintManager, cryptoObject);
-            FingerprintDialog dialog = new FingerprintDialog();
-            dialog.show(getFragmentManager(), "mydialog");
+            FingerprintDialog fragment = new FingerprintDialog();
+            fragment.setCryptoObject(cryptoObject);
+            fragment.show(getFragmentManager(), "dialogtag");
         }
     }
 
@@ -115,7 +119,7 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
     }
 
 
-    private void generateKey() {
+    public void generateKey() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             try {
                 keyStore = KeyStore.getInstance("AndroidKeyStore");
@@ -164,6 +168,7 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
             throw new RuntimeException("Failed to init Cipher", e);
         }
     }
+
 
 }
 
