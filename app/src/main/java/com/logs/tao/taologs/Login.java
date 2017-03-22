@@ -52,7 +52,8 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
     private boolean useFingerprint;
 
     private SharedPreferences mSharedPreferences;
-    @RequiresApi(api = Build.VERSION_CODES.M)
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,9 +62,13 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
         getSupportActionBar().hide();
         mFAB = (FloatingActionButton) findViewById(R.id.fingerprintReader);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        //TODO: automatically ask for fingerprint
+
         useFingerprint = mSharedPreferences.getBoolean(getString(R.string.use_fingerprint_to_authenticate_key), false);
         if(useFingerprint)
-            startAuthentication(mFAB.findFocus());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                startAuthentication(mFAB.findFocus());
+            }
         keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -146,9 +151,6 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
         }
 
     }
-
-
-    //TODO: move everything to a separate class
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     private boolean cipherInit() {

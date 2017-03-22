@@ -1,45 +1,30 @@
 package com.logs.tao.taologs;
 
-
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.RequiresApi;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
-/**
- * Created by croxx219 on 3/20/17.
- */
-
+//TODO: save boolean of checkbox.
+//TODO: manage screen rotations
 public class FingerprintDialog extends DialogFragment implements FingerprintUihelper.Callback {
 
     private Button mCancelButton;
-    private Button mSecondDialogButton;
     private View mFingerprintContent;
-    private View mBackupContent;
-    private EditText mPassword;
     private CheckBox mUseFingerprintFutureCheckBox;
-    private TextView mPasswordDescriptionTextView;
-    private TextView mNewFingerprintEnrolledTextView;
 
 
     private FingerprintManager.CryptoObject mCryptoObject;
@@ -53,7 +38,12 @@ public class FingerprintDialog extends DialogFragment implements FingerprintUihe
 
         //DO not create a new fragment when the activity is re-created (orientation changes)
         setRetainInstance(true);
-        setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Material_Light_Dialog);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Material_Light_Dialog);
+        }
+        else
+            setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Holo_Light_Dialog);
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -108,8 +98,4 @@ public class FingerprintDialog extends DialogFragment implements FingerprintUihe
         Toast.makeText(mActivity, "authenticated", Toast.LENGTH_SHORT).show();
         dismiss();
     }
-
-
-    @Override
-    public void onError() {}
 }

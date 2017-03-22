@@ -62,12 +62,6 @@ public class FingerprintUihelper extends FingerprintManager.AuthenticationCallba
     public void onAuthenticationError(int errMsgId, CharSequence errString) {
         if (!mSelfCancelled) {
             showError(errString);
-            mIcon.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mCallback.onError();
-                }
-            }, ERROR_TIMEOUT_MILLIS);
         }
     }
 
@@ -115,8 +109,6 @@ public class FingerprintUihelper extends FingerprintManager.AuthenticationCallba
     public interface Callback {
 
         void onAuthenticated();
-
-        void onError();
     }
 }
 
