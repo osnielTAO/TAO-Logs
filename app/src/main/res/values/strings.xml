@@ -18,4 +18,5 @@
     <string name="use_fingerprint_to_authenticate_key">use_fingerprint_to_authenticate_key</string>
     <string name="use_password">Use password</string>
     <string name="ok">Ok</string>
+    <string name="start">Start</string>
 </resources>

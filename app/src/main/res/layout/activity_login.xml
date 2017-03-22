@@ -45,6 +45,14 @@
             android:orientation="vertical"
             android:paddingTop="16dp"
             >
+            <TextView
+                android:id="@+id/invalidCredentials"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Wrong user name or password"
+                android:textColor="@color/warning_color"
+                android:layout_marginLeft="16dp"
+                android:visibility="invisible"/>
             <EditText
                 android:id="@+id/userName"
                 android:layout_width="wrap_content"

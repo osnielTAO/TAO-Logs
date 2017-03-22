@@ -2,6 +2,7 @@ package com.logs.tao.taologs;
 
 import android.app.DialogFragment;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
@@ -17,8 +18,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-//TODO: save boolean of checkbox.
 //TODO: manage screen rotations
 public class FingerprintDialog extends DialogFragment implements FingerprintUihelper.Callback {
 
@@ -44,6 +43,8 @@ public class FingerprintDialog extends DialogFragment implements FingerprintUihe
         else
             setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Holo_Light_Dialog);
 
+
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -61,6 +62,10 @@ public class FingerprintDialog extends DialogFragment implements FingerprintUihe
 
         mFingerprintContent = v.findViewById(R.id.fingerprint_container);
         mUseFingerprintFutureCheckBox = (CheckBox) v.findViewById(R.id.use_fingerprint_in_future_check);
+        String message = getTag();
+        if(message == "true"){
+            mUseFingerprintFutureCheckBox.setChecked(true);
+        }
         mFingerprintUiHelper = new FingerprintUihelper(mActivity.getSystemService(FingerprintManager.class), (ImageView) v.findViewById(R.id.fingerprint_icon),
                 (TextView) v.findViewById(R.id.fingerprint_status), this);
         return v;
@@ -95,7 +100,12 @@ public class FingerprintDialog extends DialogFragment implements FingerprintUihe
 
     @Override
     public void onAuthenticated() {
-        Toast.makeText(mActivity, "authenticated", Toast.LENGTH_SHORT).show();
+        Toast.makeText(mActivity, "Fingerprint recognized", Toast.LENGTH_SHORT).show();
+        Intent login = new Intent(mActivity, LogPicker.class);
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putBoolean(getString(R.string.use_fingerprint_to_authenticate_key), mUseFingerprintFutureCheckBox.isChecked());
+        editor.commit();
+        startActivity(login);
         dismiss();
     }
 }
