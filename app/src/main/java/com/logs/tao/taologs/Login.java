@@ -33,6 +33,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
 import org.w3c.dom.Text;
 
 import java.io.IOException;
@@ -187,9 +194,26 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
     private boolean verifyCredentials(){
         String user = username.getText().toString();
         String pass = password.getText().toString();
+        return sendURLRequest();
+    }
 
-        //TODO: query with the database
+    private boolean sendURLRequest(){
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = "http://172.16.10.179:8000/android";
+        StringRequest mRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>(){
+            @Override
+            public void onResponse(String response){
+                Log.e("response ", response);
+            }
 
+        }, new Response.ErrorListener(){
+            @Override
+            public void onErrorResponse(VolleyError error){
+                Toast.makeText(context,"That didn't work", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        queue.add(mRequest);
         return true;
     }
 
