@@ -58,6 +58,9 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
+/***********************************************
+/* My dev server  dev-01-us-w1.tao.local
+/***********************************************/
 public class Login extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
     public final int REQUEST_CODE = 0x1;

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="120dp"
+        android:textSize="20sp"
+        android:textColor="@color/black"
+        android:text="@string/submitVerify"/>
+
+    <ImageView
+        android:id="@+id/closeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_close"
+        android:tint="@color/warning_color"
+        android:contentDescription="@string/closeAccesibleString"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:paddingRight="10dp"
+        android:paddingTop="4dp"
+        android:paddingLeft="20dp"
+        android:paddingBottom="20dp"
+        android:onClick="goToLogPicker"/>
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/header"
+        android:layout_alignLeft="@id/header"
+        android:layout_alignRight="@id/header"
+        android:orientation="horizontal"
+        android:weightSum="1"
+        android:layout_marginTop="36dp">
+        <Button
+            android:id="@+id/cancelSubmission"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel"
+            android:backgroundTint="@color/warning_color"
+            android:layout_weight="0.5"
+            />
+
+        <Button
+            android:id="@+id/enterSubmission"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/submit"
+            android:backgroundTint="@color/colorAccent"
+            android:layout_weight="0.5"/>
+    </LinearLayout>
+</RelativeLayout>

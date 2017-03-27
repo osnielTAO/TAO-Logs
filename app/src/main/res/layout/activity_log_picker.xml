@@ -36,5 +36,6 @@
         android:layout_gravity="center"
         android:background="@color/blue"
         android:elevation="20dp"
-        tools:targetApi="lollipop" />
+        tools:targetApi="lollipop"
+        android:contentDescription="@string/start_accesible"/>
 </LinearLayout>
