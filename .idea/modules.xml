@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/TAO-Logs.iml" filepath="$PROJECT_DIR$/TAO-Logs.iml" />
       <module fileurl="file://$PROJECT_DIR$/TAOlogs.iml" filepath="$PROJECT_DIR$/TAOlogs.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>

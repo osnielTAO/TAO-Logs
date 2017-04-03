@@ -1,7 +1,6 @@
 package com.logs.tao.taologs;
 
 import android.Manifest;
-import android.app.DialogFragment;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -18,16 +17,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
-import android.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -40,9 +36,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import org.w3c.dom.Text;
-
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyStore;
@@ -201,8 +196,9 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
     }
 
     private boolean sendURLRequest(){
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://172.16.10.179:8000/android";
+        InputStream keyStore = getResources().openRawResource(R.raw.mykeystore);
+        RequestQueue queue = Volley.newRequestQueue(this, new ExtHttpClientStack(new SslHttpClient(keyStore,"123456")));
+        String url = "https://172.23.50.150/query";
         StringRequest mRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>(){
             @Override
             public void onResponse(String response){
