@@ -1,4 +1,4 @@
-package com.logs.tao.taologs;
+package org.taoconnect.logs.tools;
 
 import org.junit.Test;
 

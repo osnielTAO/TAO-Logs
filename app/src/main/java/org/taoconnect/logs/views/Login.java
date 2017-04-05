@@ -1,4 +1,4 @@
-package com.logs.tao.taologs;
+package org.taoconnect.logs.views;
 
 import android.Manifest;
 import android.app.KeyguardManager;
@@ -35,6 +35,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import org.taoconnect.logs.tools.ExtHttpClientStack;
+import org.taoconnect.logs.tools.R;
+import org.taoconnect.logs.tools.SslHttpClient;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -144,38 +147,51 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
                checkFingerprint();
             }
         }
+    }
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
+    private void login(){
+        final Intent login = new Intent(getApplicationContext(), LogPicker.class);
+        if(!isFingerDialogShown && (mFAB.getVisibility() == View.VISIBLE)){
+            AlertDialog.Builder mBuilder = new AlertDialog.Builder(context);
+            mBuilder.setTitle("Login with your fingerprint!");
+            mBuilder.setMessage("Your device supports fingerprint login, do you want to use next time you sign in?");
+            mBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    SharedPreferences.Editor editor = mSharedPreferences.edit();
+                    editor.putBoolean(getString(R.string.use_fingerprint_to_authenticate_key), true);
+                    editor.apply();
+                    startActivity(login);
+                }
+            });
+            mBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                    startActivity(login);
+                }
+            });
+            AlertDialog mDialog = mBuilder.create();
+            mDialog.show();
+        }
+        else {
+            startActivity(login);
+        }
+    }
+
+    public void verifyCredentials(View v){
+        String user = username.getText().toString();
+        String pass = password.getText().toString();
+        InputStream keyStore = getResources().openRawResource(R.raw.mykeystore);
+        RequestQueue queue = Volley.newRequestQueue(this, new ExtHttpClientStack(new SslHttpClient(keyStore,"123456")));
+        String url = "https://172.23.50.150/login?user=" + user + "&passwd=" + pass;
+        StringRequest mRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>(){
             @Override
-            public void onClick(View v) {
-                if(verifyCredentials()){
-                    final Intent login = new Intent(getApplicationContext(), LogPicker.class);
-                    if(!isFingerDialogShown && (mFAB.getVisibility() == View.VISIBLE)){
-                        AlertDialog.Builder mBuilder = new AlertDialog.Builder(context);
-                        mBuilder.setTitle("Login with your fingerprint!");
-                        mBuilder.setMessage("Your device supports fingerprint login, do you want to use next time you sign in?");
-                        mBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                SharedPreferences.Editor editor = mSharedPreferences.edit();
-                                editor.putBoolean(getString(R.string.use_fingerprint_to_authenticate_key), true);
-                                editor.apply();
-                                startActivity(login);
-                            }
-                        });
-                        mBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                                startActivity(login);
-                            }
-                        });
-                        AlertDialog mDialog = mBuilder.create();
-                        mDialog.show();
-                    }
-                    else {
-                        startActivity(login);
-                    }
+            public void onResponse(String response){
+                Log.e("response ", response);
+                if(response.equals("\"true\"")) {
+                    login();
+                    Log.e("Update", "Updated isAuthenticated");
                 }
                 else{
                     Animation a = AnimationUtils.loadAnimation(context, R.anim.shake);
@@ -186,24 +202,6 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
                     error.startAnimation(a);
                 }
             }
-        });
-    }
-
-    private boolean verifyCredentials(){
-        String user = username.getText().toString();
-        String pass = password.getText().toString();
-        return sendURLRequest();
-    }
-
-    private boolean sendURLRequest(){
-        InputStream keyStore = getResources().openRawResource(R.raw.mykeystore);
-        RequestQueue queue = Volley.newRequestQueue(this, new ExtHttpClientStack(new SslHttpClient(keyStore,"123456")));
-        String url = "https://172.23.50.150/query";
-        StringRequest mRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>(){
-            @Override
-            public void onResponse(String response){
-                Log.e("response ", response);
-            }
 
         }, new Response.ErrorListener(){
             @Override
@@ -213,7 +211,6 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
         });
 
         queue.add(mRequest);
-        return true;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -224,6 +221,7 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
             FingerprintDialog fragment = new FingerprintDialog();
             fragment.setCryptoObject(cryptoObject);
             isFingerDialogShown = true;
+            fragment.setCancelable(false);
             fragment.show(getFragmentManager(), String.valueOf(useFingerprint));
         }
     }

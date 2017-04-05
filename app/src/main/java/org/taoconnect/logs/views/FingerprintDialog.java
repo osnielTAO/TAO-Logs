@@ -1,4 +1,4 @@
-package com.logs.tao.taologs;
+package org.taoconnect.logs.views;
 
 import android.app.DialogFragment;
 import android.content.Context;
@@ -17,6 +17,8 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.taoconnect.logs.tools.R;
 
 //TODO: manage screen rotations
 public class FingerprintDialog extends DialogFragment implements FingerprintUihelper.Callback {

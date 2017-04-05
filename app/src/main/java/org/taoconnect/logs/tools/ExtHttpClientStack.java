@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.logs.tao.taologs;
+package org.taoconnect.logs.tools;
 
 import java.io.IOException;
 import java.util.ArrayList;

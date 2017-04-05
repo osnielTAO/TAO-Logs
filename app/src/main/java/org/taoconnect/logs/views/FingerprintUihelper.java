@@ -1,4 +1,4 @@
-package com.logs.tao.taologs;
+package org.taoconnect.logs.views;
 
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
@@ -6,6 +6,8 @@ import android.os.CancellationSignal;
 import android.support.annotation.RequiresApi;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import org.taoconnect.logs.tools.R;
 
 /**
  * Created by croxx219 on 3/22/17.

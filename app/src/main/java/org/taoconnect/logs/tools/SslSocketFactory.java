@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.logs.tao.taologs;
+package org.taoconnect.logs.tools;
 
 import java.io.InputStream;
 import java.security.GeneralSecurityException;

@@ -1,4 +1,4 @@
-package com.logs.tao.taologs;
+package org.taoconnect.logs.views;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -11,7 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import android.widget.TextView;
+import org.taoconnect.logs.tools.R;
 
 public class Questionary extends AppCompatActivity {
 

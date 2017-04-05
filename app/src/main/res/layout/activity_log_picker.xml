@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.logs.tao.taologs.LogPicker"
+    tools:context="com.taoconnect.logs.core.views.LogPicker"
     android:orientation="vertical">
 
     <Spinner
@@ -37,5 +37,6 @@
         android:background="@color/blue"
         android:elevation="20dp"
         tools:targetApi="lollipop"
-        android:contentDescription="@string/start_accesible"/>
+        android:contentDescription="@string/start_accesible"
+        android:onClick="startLog"/>
 </LinearLayout>

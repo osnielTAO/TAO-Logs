@@ -1,4 +1,4 @@
-package com.logs.tao.taologs;
+package org.taoconnect.logs.tools;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

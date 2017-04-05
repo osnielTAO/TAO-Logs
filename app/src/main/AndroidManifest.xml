@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.logs.tao.taologs">
+    package="org.taoconnect.logs.tools">
 
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -13,21 +13,21 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         >
-        <activity android:name=".Login">
+        <activity android:name="org.taoconnect.logs.views.Login">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LogPicker" />
+        <activity android:name="org.taoconnect.logs.views.LogPicker" />
         <activity
-            android:name=".Questionary"
+            android:name="org.taoconnect.logs.views.Questionary"
             android:label="@string/title_activity_questionary"
-            android:parentActivityName=".LogPicker">
+            android:parentActivityName="org.taoconnect.logs.views.LogPicker">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.logs.tao.taologs.LogPicker" />
+                android:value="org.taoconnect.logs.views.LogPicker" />
         </activity>
     </application>
 

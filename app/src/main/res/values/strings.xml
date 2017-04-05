@@ -23,15 +23,29 @@
     <string name="saved_log">saved_log</string>
     <string name="entryHint">Enter your response here</string>
     <string name="closeAccesibleString">Close this log</string>
-    <string-array name="logs">
-        <item>Log 1</item>
-        <item>Log 2</item>
-        <item>Log 3</item>
+    <string-array name="anxietyLogs">
+        <item>Anxiety Monitoring Log</item>
+        <item>Relaxation Log</item>
+        <item>Challenge Log</item>
+        <item>Exposure Log</item>
+    </string-array>
+    <string-array name="behavioralLogs">
+        <item>Feeling Log</item>
+        <item>Activation Plan</item>
+        <item>Rumination Record</item>
+    </string-array>
+    <string-array name="acceptanceLogs">
+        <item>"Letting Go" Exercise Log</item>
+        <item>Mindfulness Log</item>
+    </string-array>
+    <string-array name="cognitiveLogs">
+        <item>Relaxation Log</item>
     </string-array>
     <string-array name="modules">
-        <item>Module 1</item>
-        <item>Module 2</item>
-        <item>Module 3</item>
+        <item>Anxiety Logs</item>
+        <item>Behavioral Activation</item>
+        <item>Acceptance and Commitment Therapy</item>
+        <item>Cognitive Behavioral</item>
     </string-array>
     <string name="title_activity_questionary">Questionary</string>
     <string name="action_settings">Settings</string>
