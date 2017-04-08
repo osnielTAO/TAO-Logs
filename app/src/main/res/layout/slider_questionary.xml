@@ -27,22 +27,15 @@
         android:paddingLeft="20dp"
         android:paddingBottom="20dp"
         android:onClick="displayClosingDialog"/>
-    <DatePicker
-        android:id="@+id/datePicker"
-        android:layout_width="wrap_content"
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/header"
-        android:minDate="01/01/1990"
-        android:startYear="1990"
-        android:yearListSelectorColor="@color/green"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp"
-        android:paddingBottom="15dp"
-        android:paddingTop="10dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginBottom="20dp"
-        android:calendarViewShown="false"
-        android:visibility="visible">
-    </DatePicker>
+        android:progressDrawable="@drawable/progress"
+        android:thumb="@drawable/thumb"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_margin="16dp"
+        android:/>
 </RelativeLayout>

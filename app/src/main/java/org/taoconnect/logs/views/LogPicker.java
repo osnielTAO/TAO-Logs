@@ -15,7 +15,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 
-import org.taoconnect.logs.controllers.ChallengeController;
 import org.taoconnect.logs.tools.R;
 
 import org.taoconnect.logs.databases.InitialSchema;
@@ -29,7 +28,7 @@ import java.util.List;
 // TODO: populate logs from database
 // TODO: add accesibility labels
 
-public class LogPicker extends AppCompatActivity implements Spinner.OnItemSelectedListener{
+public class LogPicker extends AppCompatActivity {
 
     private Button startbutton;
     private SharedPreferences mSharedPreferences;
@@ -50,33 +49,39 @@ public class LogPicker extends AppCompatActivity implements Spinner.OnItemSelect
         hasContinue = mSharedPreferences.getBoolean(getString(R.string.saved_log), false);
         mHelper = new MySQLiteHelper(getApplicationContext());
 
-        //tempDB = openOrCreateDatabase(DBName, MODE_PRIVATE, null);
+        logs = (Spinner) findViewById(R.id.logPicker);
 
         modules = (Spinner) findViewById(R.id.modulePicker);
         ArrayAdapter<CharSequence> modulesAdapter = ArrayAdapter.createFromResource(this, R.array.modules, android.R.layout.simple_spinner_item);
         modulesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         modules.setAdapter(modulesAdapter);
-        moduleSelection = modules.getSelectedItem().toString();
+        modules.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                ArrayAdapter<CharSequence> logsAdapter = null;
+                switch(parent.getSelectedItem().toString()){
+                    case "Anxiety Logs":
+                        logsAdapter = ArrayAdapter.createFromResource(context, R.array.anxietyLogs, android.R.layout.simple_spinner_item);
+                        break;
+                    case "Behavioral Activation":
+                        logsAdapter = ArrayAdapter.createFromResource(context, R.array.behavioralLogs, android.R.layout.simple_spinner_item);
+                        break;
+                    case "Acceptance and Commitment Therapy":
+                        logsAdapter = ArrayAdapter.createFromResource(context, R.array.acceptanceLogs, android.R.layout.simple_spinner_item);
+                        break;
+                    case "Cognitive Behavioral":
+                        logsAdapter = ArrayAdapter.createFromResource(context, R.array.cognitiveLogs, android.R.layout.simple_spinner_item);
+                        break;
+                }
+                logsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                logs.setAdapter(logsAdapter);
+            }
 
-        logs = (Spinner) findViewById(R.id.logPicker);
-        ArrayAdapter<CharSequence> logsAdapter = null;
-        switch(moduleSelection){
-            case "Anxiety Logs":
-                logsAdapter = ArrayAdapter.createFromResource(context, R.array.anxietyLogs, android.R.layout.simple_spinner_item);
-                break;
-            case "Behavioral Activation":
-                logsAdapter = ArrayAdapter.createFromResource(context, R.array.behavioralLogs, android.R.layout.simple_spinner_item);
-                break;
-            case "Acceptance and Commitment Therapy":
-                logsAdapter = ArrayAdapter.createFromResource(context, R.array.acceptanceLogs, android.R.layout.simple_spinner_item);
-                break;
-            case "Cognitive Behavioral":
-                logsAdapter = ArrayAdapter.createFromResource(context, R.array.cognitiveLogs, android.R.layout.simple_spinner_item);
-                break;
-        }
-        logsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        logs.setAdapter(logsAdapter);
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
 
+            }
+        });
 
         action = (Spinner) findViewById(R.id.actionOptions);
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, android.R.id.text1);
@@ -85,13 +90,13 @@ public class LogPicker extends AppCompatActivity implements Spinner.OnItemSelect
         spinnerAdapter.add("New");
         spinnerAdapter.add("Review");
         if (hasContinue) spinnerAdapter.add("Continue");
-        spinnerAdapter.notifyDataSetChanged();
-    }
+
+        }
 
     public void startLog(View v){
-        SQLiteDatabase db = mHelper.getWritableDatabase();
-        db.close();
-        readDatabase();
+        logSelection = logs.getSelectedItem().toString();
+        actionSelection = action.getSelectedItem().toString();
+        parseSelection(logSelection, actionSelection);
      
 
     }
@@ -118,17 +123,38 @@ public class LogPicker extends AppCompatActivity implements Spinner.OnItemSelect
         db.close();
     }
 
-    private void parseSelection(String moduleSelected, String logSelected, String actionSelected) {
+    private void parseSelection(String logSelected, String actionSelected) {
         switch(actionSelected){
             case "New":
                 Intent start = new Intent(this, Questionary.class);
                 start.putExtra("Header", logSelected);
-                start.putExtra("Count", 5);
+                start.putExtra("Count", getQuestionsInLog(logSelected));
                 startActivity(start);
                 break;
             case "Review":  //TODO: send intent to review activity
                 break;
             case "Continue":  //TODO: load local copy and continue
         }
+    }
+
+    // Count is one over to include the submit screen in Quesitonary.java
+    private int getQuestionsInLog(String logSelected){
+        switch(logSelected){
+            case "Anxiety Monitoring Log": return 9;
+            case "Relaxation Log": return 4;
+            case "Challenge Log": return 13;
+            case "Exposure Log": return 8;
+            case "Feeling Log":
+            case "Activation Plan":
+            case "Rumination Record":
+            case "Letting Go Exercise Log":
+            case "Mindfulness Log":
+            case "Anxiety Logs":
+            case "Behavioral Activation":
+            case "Acceptance and Commitment Therapy":
+            case "Cognitive Behavioral":
+                break;
+        }
+        return 0;
     }
 }

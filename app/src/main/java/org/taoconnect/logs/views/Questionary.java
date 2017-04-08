@@ -1,12 +1,17 @@
 package org.taoconnect.logs.views;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +22,7 @@ public class Questionary extends AppCompatActivity {
 
     private static int count;  //Number of questions
     private SectionsPagerAdapter mSectionsPagerAdapter;
+    private String log;
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -72,7 +78,7 @@ public class Questionary extends AppCompatActivity {
                 rootView = inflater.inflate(R.layout.submit_questionary, container, false);
             }
             else {
-                rootView = inflater.inflate(R.layout.datepicker_questionary, container, false);
+                rootView = inflater.inflate(R.layout.slider_questionary, container, false);
             }
             return rootView;
         }
@@ -80,6 +86,7 @@ public class Questionary extends AppCompatActivity {
 
     private ViewPager mViewPager;
 
+    /** This method only gets called once **/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,11 +103,35 @@ public class Questionary extends AppCompatActivity {
         Intent receivedIntent = getIntent();
         Bundle extras = receivedIntent.getExtras();
         count = extras.getInt("Count");
+        log = extras.getString("Header");
+
     }
 
+    public void displayClosingDialog(View v){
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(this);
+        mBuilder.setTitle("Are you sure you want to exit?");
+        mBuilder.setMessage("We will save your current progress so you can continue right from where you left off");
+        mBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+                editor.putBoolean(getString(R.string.saved_log), true);
+                editor.apply();
+                goToLogPicker();
+            }
+        });
+        mBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        AlertDialog mDialog = mBuilder.create();
+        mDialog.show();
+    }
 
     //TODO: save progress locally before going back
-    public void goToLogPicker(View v){
+    private void goToLogPicker(){
         Intent close = new Intent(this, LogPicker.class);
         close.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(close);

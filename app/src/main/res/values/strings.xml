@@ -35,7 +35,7 @@
         <item>Rumination Record</item>
     </string-array>
     <string-array name="acceptanceLogs">
-        <item>"Letting Go" Exercise Log</item>
+        <item>Letting Go Exercise Log</item>
         <item>Mindfulness Log</item>
     </string-array>
     <string-array name="cognitiveLogs">
