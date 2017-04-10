@@ -61,8 +61,6 @@ public class LogAnxietyMonitoring implements LogInterface {
         }
         else {
             log = new LogAnxietyMonitoring(context);
-            log.getQuestions();
-            log.getResources();
             return log;
         }
     }

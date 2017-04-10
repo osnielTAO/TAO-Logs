@@ -91,7 +91,8 @@ public class LogPicker extends AppCompatActivity {
         spinnerAdapter.add("Review");
         if (hasContinue) spinnerAdapter.add("Continue");
 
-        }
+        readDatabase();
+    }
 
     public void startLog(View v){
         logSelection = logs.getSelectedItem().toString();
@@ -104,14 +105,14 @@ public class LogPicker extends AppCompatActivity {
     private void readDatabase(){
         SQLiteDatabase db = mHelper.getReadableDatabase();
         Cursor firstSet = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_RELAX_LOG, null);
-        Cursor secondSet = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_ANX_MON_LOG, null);
-        Cursor thirdSet = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_EXPOSURE_LOG, null);
-        Cursor fourthSet = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_CHALLENGE_LOG, null);
+        //Cursor secondSet = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_ANX_MON_LOG, null);
+        //Cursor thirdSet = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_EXPOSURE_LOG, null);
+       // Cursor fourthSet = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_CHALLENGE_LOG, null);
         List<Cursor> myCursors = new ArrayList<Cursor>();
         myCursors.add(firstSet);
-        myCursors.add(secondSet);
-        myCursors.add(thirdSet);
-        myCursors.add(fourthSet);
+        //myCursors.add(secondSet);
+       // myCursors.add(thirdSet);
+       // myCursors.add(fourthSet);
 
        for(Cursor section : myCursors) {
                 String[] columns = section.getColumnNames();

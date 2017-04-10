@@ -36,9 +36,9 @@ public class LogChallenge implements LogInterface {
             "What did you do or not do because of the worry",
             "Outcome of the situation:",
             "Unhealthy Assumptions",
-            "Challenges to your Uhealthy Assumptions",
+            "Challenges to your Unhealthy Assumptions",
             "Unhealthy Core Beliefs",
-            "Alterante way of viewing the situation"};
+            "Alternate way of viewing the situation"};
     private int[] resources={R.layout.datepicker_questionary,
             R.layout.timepicker_questionary,
             R.layout.slider_questionary,
@@ -162,7 +162,7 @@ public class LogChallenge implements LogInterface {
     public void setChallenges(String challenges){
         this.challenges = challenges;
     }
-    public void setCoreBelieves(String coreBelieves){
+    public void setCoreBeliefs(String coreBelieves){
         this.coreBelieves = coreBelieves;
     }
     public void setAlternateView(String alternative){

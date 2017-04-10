@@ -3,25 +3,27 @@ package org.taoconnect.logs.controllers;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.TimePicker;
 
 import org.taoconnect.logs.models.LogAnxietyMonitoring;
 import org.taoconnect.logs.models.LogChallenge;
@@ -31,6 +33,8 @@ import org.taoconnect.logs.tools.R;
 
 import java.util.ArrayList;
 import java.util.List;
+
+
 
 public class Questionary extends AppCompatActivity {
 
@@ -109,10 +113,11 @@ public class Questionary extends AppCompatActivity {
             else {
                 rootView = inflater.inflate(layouts[section-1], container, false);
                 if(layouts[section-1] == R.layout.single_choice_questionary){
-                    ListView list = (ListView) rootView.findViewById(R.id.choices);
+                    ListView list = (ListView) rootView.findViewById(R.id.singlechoices);
                     ArrayAdapter<String> adapter = new ArrayAdapter<String>(rootView.getContext(),android.R.layout.simple_list_item_single_choice,
                             getResources().getStringArray(R.array.singleChoiceRelaxationLog));
                     list.setAdapter(adapter);
+                    list.setSelection(0);
                 } else if (layouts[section-1] == R.layout.multiple_choice_questionary) {
                     ArrayAdapter<String> adapter;
                     ListView list = (ListView) rootView.findViewById(R.id.choices);
@@ -123,7 +128,7 @@ public class Questionary extends AppCompatActivity {
                     }
                     else if(headers[section-1].equals("Unhealthy Core Beliefs")){
                         adapter = new ArrayAdapter<String>(rootView.getContext(), android.R.layout.simple_list_item_multiple_choice,
-                                getResources().getStringArray(R.array.unhealthyAssumptions));
+                                getResources().getStringArray(R.array.unhealthyCoreBeliefs));
                         list.setAdapter(adapter);
                     }
 
@@ -188,15 +193,187 @@ public class Questionary extends AppCompatActivity {
         }
         TextView text = (TextView) v.findViewById(R.id.header);
         String tag = text.getText().toString();
-        Log.e("Event", tag);
+
         switch(log){
             case "Anxiety Monitoring Log":
+                switch(tag){
+                    case "Date of anxiety":
+                        DatePicker datePicker = (DatePicker) v.findViewById(R.id.datePicker);
+                        int day = datePicker.getDayOfMonth();
+                        int month = datePicker.getMonth()+1;
+                        int year = datePicker.getYear();
+                        String date = month + "/" + day + "/" + year;
+                        logAnxiety.setDate(date);
+                        break;
+                    case "Time of Anxiety Event":
+                        TimePicker timePicker = (TimePicker) v.findViewById(R.id.timePicker);
+                        int hour = timePicker.getCurrentHour();
+                        int min = timePicker.getCurrentMinute();
+                        String time = hour + ":" + min;
+                        logAnxiety.setTime(time);
+                        break;
+                    case "Anxiety Level":
+                        SeekBar progress = (SeekBar) v.findViewById(R.id.seekBar);
+                        int level = progress.getProgress();
+                        logAnxiety.setAnxietyLevel(level);
+                        break;
+                    case "Anxiety Event: Describe the conditions surrounding the event":
+                        EditText entry1 = (EditText) v.findViewById(R.id.entry);
+                        logAnxiety.setAnxietyEvent(entry1.getText().toString());
+                        break;
+                    case "Specific Worry: describe the worry that arose from the conditions you describe above.":
+                        EditText entry2 = (EditText) v.findViewById(R.id.entry);
+                        logAnxiety.setSpecificWorry(entry2.getText().toString());
+                        break;
+                    case "Possible Triggers":
+                        EditText entry3 = (EditText) v.findViewById(R.id.entry);
+                        logAnxiety.setTriggers(entry3.getText().toString());
+                        break;
+                    case "What did you do or not do because of the worry":
+                        EditText entry4 = (EditText) v.findViewById(R.id.entry);
+                        logAnxiety.setActionTaken(entry4.getText().toString());
+                        break;
+                    case "Outcome of the situation":
+                        EditText entry5 = (EditText) v.findViewById(R.id.entry);
+                        logAnxiety.setOutcome(entry5.getText().toString());
+                        break;
+                }
                 break;
             case "Relaxation Log":
+                switch(tag){
+                    case "Thoughts, emotions, worries BEFORE relaxation:":
+                        EditText entry1 = (EditText) v.findViewById(R.id.entry);
+                        logRelaxation.setThoughts(entry1.getText().toString());
+                        break;
+                    case "Select a Relaxation Exercise:":
+                        ListView list = (ListView) v.findViewById(R.id.singlechoices);
+                        int position = list.getCheckedItemPosition();
+                        if(position != -1){
+                            String selected = list.getItemAtPosition(position).toString();
+                            logRelaxation.setRelaxationExercise(selected);
+                        }
+                        break;
+                    case "Anxiety Level:":
+                        SeekBar progress = (SeekBar) v.findViewById(R.id.seekBar);
+                        int level = progress.getProgress();
+                        logRelaxation.setAnxietyLevel(level);
+                        break;
+                }
                 break;
             case "Challenge Log":
+                switch(tag){
+                    case "Date of anxiety":
+                        DatePicker datePicker = (DatePicker) v.findViewById(R.id.datePicker);
+                        int day = datePicker.getDayOfMonth();
+                        int month = datePicker.getMonth()+1;
+                        int year = datePicker.getYear();
+                        String date = month + "/" + day + "/" + year;
+                        logChallenge.setDate(date);
+                        break;
+                    case "Time of Anxiety Event":
+                        TimePicker timePicker = (TimePicker) v.findViewById(R.id.timePicker);
+                        int hour = timePicker.getCurrentHour();
+                        int min = timePicker.getCurrentMinute();
+                        String time = hour + ":" + min;
+                        logChallenge.setTime(time);
+                        break;
+                    case "Anxiety Level":
+                        SeekBar progress = (SeekBar) v.findViewById(R.id.seekBar);
+                        int level = progress.getProgress();
+                        logChallenge.setAnxietyLevel(level);
+                        break;
+                    case "Anxiety Event: Describe the conditions surrounding the event":
+                        EditText entry1 = (EditText) v.findViewById(R.id.entry);
+                        logChallenge.setAnxietyEvent(entry1.getText().toString());
+                        break;
+                    case "Specific Worry: describe the worry that arose from the conditions you describe above.":
+                        EditText entry2 = (EditText) v.findViewById(R.id.entry);
+                        logChallenge.setSpecificWorry(entry2.getText().toString());
+                        break;
+                    case "Possible Triggers":
+                        EditText entry3 = (EditText) v.findViewById(R.id.entry);
+                        logChallenge.setTriggers(entry3.getText().toString());
+                        break;
+                    case "What did you do or not do because of the worry":
+                        EditText entry4 = (EditText) v.findViewById(R.id.entry);
+                        logChallenge.setActionTaken(entry4.getText().toString());
+                        break;
+                    case "Outcome of the situation":
+                        EditText entry5 = (EditText) v.findViewById(R.id.entry);
+                        logChallenge.setOutcome(entry5.getText().toString());
+                        break;
+                    case "Unhealthy Assumptions":
+                        ListView list = (ListView) v.findViewById(R.id.choices);
+                        SparseBooleanArray checked = list.getCheckedItemPositions();
+                        List<String> selectedItems = new ArrayList<String>();
+                        for(int i = 0; i < list.getCount(); i++){
+                            if(checked.get(i)){
+                                selectedItems.add(list.getItemAtPosition(i).toString());
+                            }
+                        }
+                        String assumptions = TextUtils.join(",", selectedItems.toArray());
+                        logChallenge.setAssumptions(assumptions);
+                        break;
+                    case "Challenges to your Unhealthy Assumptions":
+                        EditText entry6 = (EditText) v.findViewById(R.id.entry);
+                        logChallenge.setChallenges(entry6.getText().toString());
+                        break;
+                    case "Unhealthy Core Beliefs":
+                        ListView list2 = (ListView) v.findViewById(R.id.choices);
+                        SparseBooleanArray checked2 = list2.getCheckedItemPositions();
+                        List<String> selectedItems2 = new ArrayList<String>();
+                        for(int i = 0; i < list2.getCount(); i++){
+                            if(checked2.get(i)){
+                                selectedItems2.add(list2.getItemAtPosition(i).toString());
+                            }
+                        }
+                        String beliefs = TextUtils.join(",", selectedItems2.toArray());
+                        logChallenge.setCoreBeliefs(beliefs);
+                        break;
+                    case "Alternate way of viewing the situation":
+                        EditText entry7 = (EditText) v.findViewById(R.id.entry);
+                        logChallenge.setAlternateView(entry7.getText().toString());
+                        break;
+                }
                 break;
             case "Exposure Log":
+                switch(tag){
+                    case "Worry situation:":
+                        EditText entry1 = (EditText) v.findViewById(R.id.entry);
+                        logExposure.setWorrySituation(entry1.getText().toString());
+                        break;
+                    case "Worst possible outcome":
+                        EditText entry4 = (EditText) v.findViewById(R.id.entry);
+                        logExposure.setWorstOutcome(entry4.getText().toString());
+                        break;
+                    case "SUDS prior to exposure": SeekBar progress1 = (SeekBar) v.findViewById(R.id.seekBar);
+                        int level1 = progress1.getProgress();
+                        logExposure.setSUDSPrior(level1);
+                        break;
+                    case "SUDS MAXIMUM during exposure":
+                        SeekBar progress2 = (SeekBar) v.findViewById(R.id.seekBar);
+                        int level2 = progress2.getProgress();
+                        logExposure.setSUDSMax(level2);
+                        break;
+                    case "SUDS AFTER thinking of alternatives":
+                        SeekBar progress3 = (SeekBar) v.findViewById(R.id.seekBar);
+                        int level3 = progress3.getProgress();
+                        logExposure.setSUDSAfter(level3);
+                        break;
+                    case "SUDS at the end of the exercise":
+                        SeekBar progress4 = (SeekBar) v.findViewById(R.id.seekBar);
+                        int level4 = progress4.getProgress();
+                        logExposure.setSUDSEnd(level4);
+                        break;
+                    case "Symptons during the exercise":
+                        EditText entry2 = (EditText) v.findViewById(R.id.entry);
+                        logChallenge.setAlternateView(entry2.getText().toString());
+                        break;
+                    case "Alternative outcomes":
+                        EditText entry3 = (EditText) v.findViewById(R.id.entry);
+                        logChallenge.setAlternateView(entry3.getText().toString());
+                        break;
+                }
                 break;
             case "Feeling Log":
             case "Activation Plan":
@@ -265,11 +442,41 @@ public class Questionary extends AppCompatActivity {
         mDialog.show();
     }
 
-    //TODO: save progress locally before going back
     private void goToLogPicker(){
         Intent close = new Intent(this, LogPicker.class);
+        switch(log){
+            case "Anxiety Monitoring Log": logAnxiety.insertToDB();
+                break;
+            case "Relaxation Log": logRelaxation.insertToDB();
+                break;
+            case "Challenge Log": logChallenge.insertToDB();
+                break;
+            case "Exposure Log": logExposure.insertToDB();
+                break;
+            case "Feeling Log":
+            case "Activation Plan":
+            case "Rumination Record":
+            case "Letting Go Exercise Log":
+            case "Mindfulness Log":
+            case "Anxiety Logs":
+            case "Behavioral Activation":
+            case "Acceptance and Commitment Therapy":
+            case "Cognitive Behavioral":
+                break;
+        }
         close.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(close);
         finish();
+    }
+
+    @Override
+    public void onBackPressed(){
+        if(mViewPager.getCurrentItem() != 0){
+            mViewPager.setCurrentItem(itr-1);
+        }
+        else{
+            View placeholder= new View(this);  //This is just to fulfill method requirements
+            displayClosingDialog(placeholder);
+        }
     }
 }
