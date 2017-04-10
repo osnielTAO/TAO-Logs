@@ -1,13 +1,19 @@
 package org.taoconnect.logs.models;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+
 import org.taoconnect.logs.databases.InitialSchema;
+import org.taoconnect.logs.databases.MySQLiteHelper;
 import org.taoconnect.logs.tools.R;
 
 /**
  * Created by croxx219 on 4/5/17.
  */
 
-public class LogExposure extends LogParent{
+public class LogExposure implements LogInterface {
+    private Context context;
     public String tableName = InitialSchema.TABLE_NAME_EXPOSURE_LOG;
     private String worrySituation;
     private String worstOutcome;
@@ -41,6 +47,25 @@ public class LogExposure extends LogParent{
     }
     public String[] getQuestions() {
         return questions;
+    }
+    public LogExposure(Context context) {
+        this.context = context;
+    }
+    @Override
+    public void insertToDB() {
+        MySQLiteHelper mHelper = new MySQLiteHelper(context);
+        SQLiteDatabase db = mHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(InitialSchema.WORRY_SITUATION, getWorrySituation());
+        values.put(InitialSchema.WORST_OUTCOME, getWorstOutcome());
+        values.put(InitialSchema.SUDS_PRIOR, getSUDSPrior());
+        values.put(InitialSchema.SUDS_MAX, getSUDSMax());
+        values.put(InitialSchema.SUDS_AFTER, getSUDSAfter());
+        values.put(InitialSchema.SUDS_END, getSUDSEnd());
+        values.put(InitialSchema.SYMPTONS_DURING, getSymptons());
+        values.put(InitialSchema.ALTERNATIVE_OUTCOMES, getAlternative());
+
+        long newRow = db.insert(getTableName(), null, values);
     }
 
     public String getWorrySituation() {

@@ -3,16 +3,7 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/header"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:textSize="20sp"
-        android:textColor="@color/black"
-        android:text="Question 1:"
-        android:layout_below="@id/closeButton"/>
-    <ImageView
+     <ImageView
         android:id="@+id/closeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -27,6 +18,16 @@
         android:paddingLeft="20dp"
         android:paddingBottom="12dp"
         android:onClick="displayClosingDialog"/>
+    <TextView
+        android:id="@+id/header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:textSize="20sp"
+        android:textColor="@color/black"
+        android:text="Question 1:"
+        android:layout_below="@id/closeButton"/>
+
     <DatePicker
         android:id="@+id/datePicker"
         android:layout_width="wrap_content"

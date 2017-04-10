@@ -1,4 +1,4 @@
-package org.taoconnect.logs.views;
+package org.taoconnect.logs.controllers;
 
 import android.Manifest;
 import android.app.KeyguardManager;

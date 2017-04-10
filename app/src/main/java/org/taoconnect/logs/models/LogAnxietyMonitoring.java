@@ -1,15 +1,19 @@
 package org.taoconnect.logs.models;
 
 
-import org.taoconnect.logs.controllers.ChallengeController;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+
 import org.taoconnect.logs.databases.InitialSchema;
+import org.taoconnect.logs.databases.MySQLiteHelper;
 import org.taoconnect.logs.tools.R;
 
 /**
  * Created by croxx219 on 4/5/17.
  */
 
-public class LogAnxietyMonitoring extends LogParent{
+public class LogAnxietyMonitoring implements LogInterface {
     private String tableName = InitialSchema.TABLE_NAME_ANX_MON_LOG;
     private String dateSelected;
     private String timeSelected;
@@ -19,6 +23,7 @@ public class LogAnxietyMonitoring extends LogParent{
     private String triggers;
     private String actionTaken;
     private String outcome;
+    private Context context;
     private String[] questions = {"Date of anxiety",
                                   "Time of Anxiety Event",
                                   "Anxiety Level",
@@ -42,6 +47,41 @@ public class LogAnxietyMonitoring extends LogParent{
 
     public String[] getQuestions() {
         return questions;
+    }
+
+    public LogAnxietyMonitoring(Context context){
+        this.context = context;
+    }
+
+    public static LogAnxietyMonitoring newInstance(Context context, boolean isFromDB){
+        LogAnxietyMonitoring log = null;
+        if(isFromDB){
+            return log;
+            //TODO:Pull from database
+        }
+        else {
+            log = new LogAnxietyMonitoring(context);
+            log.getQuestions();
+            log.getResources();
+            return log;
+        }
+    }
+
+    @Override
+    public void insertToDB() {
+        MySQLiteHelper mHelper = new MySQLiteHelper(context);
+        SQLiteDatabase db = mHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(InitialSchema.DATE_SELECTED, getDateSelected());
+        values.put(InitialSchema.TIME_SELECTED, getTimeSelected());
+        values.put(InitialSchema.ANXIETY_LEVEL, getAnxietyLevel());
+        values.put(InitialSchema.ANXIETY_EVENT, getAnxietyEvent());
+        values.put(InitialSchema.SPECIFIC_WORRY, getSpecificWorry());
+        values.put(InitialSchema.TRIGGERS, getTriggers());
+        values.put(InitialSchema.ACTION_TAKEN, getActionTaken());
+        values.put(InitialSchema.OUTCOME, getOutcome());
+
+        long newRow = db.insert(getTableName(), null, values);
     }
 
     public String getDateSelected() {

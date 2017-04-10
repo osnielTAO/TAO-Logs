@@ -13,21 +13,21 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         >
-        <activity android:name="org.taoconnect.logs.views.Login">
+        <activity android:name="org.taoconnect.logs.controllers.Login">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="org.taoconnect.logs.views.LogPicker" />
+        <activity android:name="org.taoconnect.logs.controllers.LogPicker" />
         <activity
-            android:name="org.taoconnect.logs.views.Questionary"
+            android:name="org.taoconnect.logs.controllers.Questionary"
             android:label="@string/title_activity_questionary"
-            android:parentActivityName="org.taoconnect.logs.views.LogPicker">
+            android:parentActivityName="org.taoconnect.logs.controllers.LogPicker">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.taoconnect.logs.views.LogPicker" />
+                android:value="org.taoconnect.logs.controllers.LogPicker" />
         </activity>
     </application>
 

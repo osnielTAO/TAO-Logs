@@ -1,4 +1,4 @@
-package org.taoconnect.logs.views;
+package org.taoconnect.logs.controllers;
 
 import android.content.Context;
 import android.content.Intent;
@@ -15,7 +15,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 
-import org.taoconnect.logs.models.LogAnxietyMonitoring;
 import org.taoconnect.logs.tools.R;
 
 import org.taoconnect.logs.databases.InitialSchema;

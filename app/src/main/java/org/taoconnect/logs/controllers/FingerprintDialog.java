@@ -1,4 +1,4 @@
-package org.taoconnect.logs.views;
+package org.taoconnect.logs.controllers;
 
 import android.app.DialogFragment;
 import android.content.Context;

@@ -1,13 +1,19 @@
 package org.taoconnect.logs.models;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+
 import org.taoconnect.logs.databases.InitialSchema;
+import org.taoconnect.logs.databases.MySQLiteHelper;
 import org.taoconnect.logs.tools.R;
 
 /**
  * Created by croxx219 on 4/5/17.
  */
 
-public class LogRelaxation extends LogParent{
+public class LogRelaxation implements LogInterface {
+    private Context context;
     private String thoughts;
     private String relaxationExercise;
     private int anxietyLevel;
@@ -25,6 +31,22 @@ public class LogRelaxation extends LogParent{
     }
     public String[] getQuestions() {
         return questions;
+    }
+
+    public LogRelaxation(Context context) {
+        this.context = context;
+    }
+
+    @Override
+    public void insertToDB() {
+        MySQLiteHelper mHelper = new MySQLiteHelper(context);
+        SQLiteDatabase db = mHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(InitialSchema.THOUGHTS_BEFORE, getThoughts());
+        values.put(InitialSchema.RELAXATION_EXERCISE, getRelaxationExercise());
+        values.put(InitialSchema.ANXIETY_LEVEL, getAnxietyLevel());
+
+        long newRow = db.insert(getTableName(), null, values);
     }
 
     public String getThoughts() {
