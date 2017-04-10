@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.constraint.solver.SolverVariable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v4.app.Fragment;
@@ -15,7 +16,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 
+import org.taoconnect.logs.models.LogAnxietyMonitoring;
+import org.taoconnect.logs.models.LogChallenge;
+import org.taoconnect.logs.models.LogExposure;
+import org.taoconnect.logs.models.LogParent;
+import org.taoconnect.logs.models.LogRelaxation;
 import org.taoconnect.logs.tools.R;
 
 public class Questionary extends AppCompatActivity {
@@ -23,6 +32,10 @@ public class Questionary extends AppCompatActivity {
     private static int count;  //Number of questions
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private String log;
+    private LogParent logClass;
+    private static int[] layouts;
+    private static String[] headers;
+
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -44,7 +57,7 @@ public class Questionary extends AppCompatActivity {
         // Total number of questions to be displayed
         @Override
         public int getCount() {
-            return 5;
+            return count;
         }
 
         @Override
@@ -74,11 +87,36 @@ public class Questionary extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView;
-            if(getArguments().getInt(ARG_SECTION_NUMBER) == count){
+            int section = getArguments().getInt(ARG_SECTION_NUMBER);
+            if(section == count){
+                Log.e("Reached end", "");
                 rootView = inflater.inflate(R.layout.submit_questionary, container, false);
             }
             else {
-                rootView = inflater.inflate(R.layout.slider_questionary, container, false);
+                rootView = inflater.inflate(layouts[section-1], container, false);
+                if(layouts[section-1] == R.layout.single_choice_questionary){
+                    ListView list = (ListView) rootView.findViewById(R.id.choices);
+                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(rootView.getContext(),android.R.layout.simple_list_item_single_choice,
+                            getResources().getStringArray(R.array.singleChoiceRelaxationLog));
+                    list.setAdapter(adapter);
+                } else if (layouts[section-1] == R.layout.multiple_choice_questionary) {
+                    ArrayAdapter<String> adapter;
+                    ListView list = (ListView) rootView.findViewById(R.id.choices);
+                    if(headers[section-1] == "Unhealthy Assumptions") {
+                       adapter = new ArrayAdapter<String>(rootView.getContext(), android.R.layout.simple_list_item_multiple_choice,
+                                getResources().getStringArray(R.array.unhealthyAssumptions));
+                        list.setAdapter(adapter);
+                    }
+                    else if(headers[section-1] == "Unhealthy Core Beliefs"){
+                        adapter = new ArrayAdapter<String>(rootView.getContext(), android.R.layout.simple_list_item_multiple_choice,
+                                getResources().getStringArray(R.array.unhealthyAssumptions));
+                        list.setAdapter(adapter);
+                    }
+
+                }
+                TextView header = (TextView) rootView.findViewById(R.id.header);
+                header.setText(headers[section-1]);
+
             }
             return rootView;
         }
@@ -92,6 +130,9 @@ public class Questionary extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_questionary);
 
+        Intent receivedIntent = getIntent();
+        Bundle extras = receivedIntent.getExtras();
+        count = extras.getInt("Count");
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -100,11 +141,35 @@ public class Questionary extends AppCompatActivity {
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        Intent receivedIntent = getIntent();
-        Bundle extras = receivedIntent.getExtras();
-        count = extras.getInt("Count");
-        log = extras.getString("Header");
 
+
+        log = extras.getString("Log");
+        createLogClass(log);
+        layouts = logClass.getResources();
+        headers = logClass.getQuestions();
+    }
+
+    private void createLogClass(String log){
+        switch (log){
+            case "Anxiety Monitoring Log": logClass = new LogAnxietyMonitoring();
+                break;
+            case "Relaxation Log": logClass = new LogRelaxation();
+                break;
+            case "Challenge Log": logClass = new LogChallenge();
+                break;
+            case "Exposure Log": logClass = new LogExposure();
+                break;
+            case "Feeling Log":
+            case "Activation Plan":
+            case "Rumination Record":
+            case "Letting Go Exercise Log":
+            case "Mindfulness Log":
+            case "Anxiety Logs":
+            case "Behavioral Activation":
+            case "Acceptance and Commitment Therapy":
+            case "Cognitive Behavioral":
+                break;
+        }
     }
 
     public void displayClosingDialog(View v){

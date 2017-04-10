@@ -1,12 +1,13 @@
 package org.taoconnect.logs.models;
 
 import org.taoconnect.logs.databases.InitialSchema;
+import org.taoconnect.logs.tools.R;
 
 /**
  * Created by croxx219 on 4/5/17.
  */
 
-public class LogExposure {
+public class LogExposure extends LogParent{
     public String tableName = InitialSchema.TABLE_NAME_EXPOSURE_LOG;
     private String worrySituation;
     private String worstOutcome;
@@ -16,6 +17,31 @@ public class LogExposure {
     private int SUDSEnd;
     private String symptons;
     private String alternative;
+    private String[] questions ={"Worry situation:",
+            "Worst possible outcome",
+            "SUDS prior to exposure",
+            "SUDS MAXIMUM during exposure",
+            "SUDS AFTER thinking of alternatives",
+            "SUDS at the end of the exercise",
+            "Symptons during the exercise",
+            "Alternative outcomes",};
+
+    private int[] resources={R.layout.short_response_questionary,
+            R.layout.short_response_questionary,
+            R.layout.slider_questionary,
+            R.layout.slider_questionary,
+            R.layout.slider_questionary,
+            R.layout.slider_questionary,
+            R.layout.longresponse_questionary,
+            R.layout.longresponse_questionary,
+    };
+
+    public int[] getResources() {
+        return resources;
+    }
+    public String[] getQuestions() {
+        return questions;
+    }
 
     public String getWorrySituation() {
         return worrySituation;

@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 
+import org.taoconnect.logs.models.LogAnxietyMonitoring;
 import org.taoconnect.logs.tools.R;
 
 import org.taoconnect.logs.databases.InitialSchema;
@@ -113,8 +114,8 @@ public class LogPicker extends AppCompatActivity {
         myCursors.add(thirdSet);
         myCursors.add(fourthSet);
 
-       for(Cursor itr : myCursors) {
-                String[] columns = itr.getColumnNames();
+       for(Cursor section : myCursors) {
+                String[] columns = section.getColumnNames();
                     for (String name: columns){
                         Log.e("Row", name);
                     }
@@ -127,7 +128,7 @@ public class LogPicker extends AppCompatActivity {
         switch(actionSelected){
             case "New":
                 Intent start = new Intent(this, Questionary.class);
-                start.putExtra("Header", logSelected);
+                start.putExtra("Log", logSelected);
                 start.putExtra("Count", getQuestionsInLog(logSelected));
                 startActivity(start);
                 break;

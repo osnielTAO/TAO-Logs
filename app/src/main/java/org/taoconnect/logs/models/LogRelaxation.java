@@ -1,16 +1,31 @@
 package org.taoconnect.logs.models;
 
 import org.taoconnect.logs.databases.InitialSchema;
+import org.taoconnect.logs.tools.R;
 
 /**
  * Created by croxx219 on 4/5/17.
  */
 
-public class LogRelaxation {
+public class LogRelaxation extends LogParent{
     private String thoughts;
     private String relaxationExercise;
     private int anxietyLevel;
     private String tableName = InitialSchema.TABLE_NAME_RELAX_LOG;
+    private String[] questions = {"Thoughts, emotions, worries BEFORE relaxation:",
+            "Anxiety Level:",
+            "Select a Relaxation Exercise:"};
+
+    private int[] resources={R.layout.longresponse_questionary,
+            R.layout.slider_questionary,
+            R.layout.single_choice_questionary,
+    };
+    public int[] getResources() {
+        return resources;
+    }
+    public String[] getQuestions() {
+        return questions;
+    }
 
     public String getThoughts() {
         return thoughts;

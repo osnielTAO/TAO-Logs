@@ -3,12 +3,13 @@ package org.taoconnect.logs.models;
 
 import org.taoconnect.logs.controllers.ChallengeController;
 import org.taoconnect.logs.databases.InitialSchema;
+import org.taoconnect.logs.tools.R;
 
 /**
  * Created by croxx219 on 4/5/17.
  */
 
-public class LogAnxietyMonitoring {
+public class LogAnxietyMonitoring extends LogParent{
     private String tableName = InitialSchema.TABLE_NAME_ANX_MON_LOG;
     private String dateSelected;
     private String timeSelected;
@@ -18,6 +19,30 @@ public class LogAnxietyMonitoring {
     private String triggers;
     private String actionTaken;
     private String outcome;
+    private String[] questions = {"Date of anxiety",
+                                  "Time of Anxiety Event",
+                                  "Anxiety Level",
+                                  "Anxiety Event: Describe the conditions surrounding the event",
+                                  "Specific Worry: describe the worry that arose from the conditions you describe above.",
+                                  "Possible Triggers:",
+                                  "What did you do or not do because of the worry",
+                                  "Outcome of the situation:"};
+    private int[] resources={R.layout.datepicker_questionary,
+            R.layout.timepicker_questionary,
+            R.layout.slider_questionary,
+            R.layout.longresponse_questionary,
+            R.layout.longresponse_questionary,
+            R.layout.short_response_questionary,
+            R.layout.short_response_questionary,
+            R.layout.short_response_questionary};
+
+    public int[] getResources() {
+        return resources;
+    }
+
+    public String[] getQuestions() {
+        return questions;
+    }
 
     public String getDateSelected() {
         return dateSelected;

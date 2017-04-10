@@ -47,6 +47,33 @@
         <item>Acceptance and Commitment Therapy</item>
         <item>Cognitive Behavioral</item>
     </string-array>
+    <string-array name="singleChoiceRelaxationLog">
+        <item>Deep Breathing</item>
+        <item>Progressive Muscle Relaxation</item>
+        <item>Guided Imagery</item>
+        <item>Mindfulness</item>
+    </string-array>
+    <string-array name="unhealthyAssumptions">
+        <item>All-or-Nothing Thinking</item>
+        <item>Discounting the Positive</item>
+        <item>Emotionl Reasoning</item>
+        <item>Over Generalization</item>
+        <item>Jumping to Conclusions</item>
+        <item>Labeling</item>
+        <item>Magnification</item>
+        <item>Mental Filter</item>
+        <item>Should Statements</item>
+    </string-array>
+    <string-array name="unhealthyCoreBeliefs">
+        <item>Control</item>
+        <item>Responsibility</item>
+        <item>Danger</item>
+        <item>Failure</item>
+        <item>Abandonment</item>
+        <item>Entitlement</item>
+        <item>Trust</item>
+        <item>Personal Worth</item>
+    </string-array>
     <string name="title_activity_questionary">Questionary</string>
     <string name="action_settings">Settings</string>
     <string name="section_format">Hello World from section: %1$d</string>
