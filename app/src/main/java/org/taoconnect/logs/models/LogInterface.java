@@ -9,5 +9,5 @@ import android.database.sqlite.SQLiteDatabase;
 interface LogInterface {
     int[] getResources() ;
     String[] getQuestions() ;
-    void insertToDB();
+    void insertToTempDB(boolean toPermanentDB);
 }

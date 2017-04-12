@@ -115,11 +115,17 @@ public class LogPicker extends AppCompatActivity {
        // myCursors.add(fourthSet);
 
        for(Cursor section : myCursors) {
-                String[] columns = section.getColumnNames();
-                    for (String name: columns){
-                        Log.e("Row", name);
-                    }
-
+           if(section.getCount() > 0) {
+               String[] columns = section.getColumnNames();
+               section.moveToFirst();
+               List<String> values = new ArrayList<String>();
+               do{
+                   Log.e("Values", section.getString(section.getColumnIndex(columns[0])));
+                   Log.e("Values", String.valueOf(section.getInt(section.getColumnIndex(columns[1]))));
+                   Log.e("Values", section.getString(section.getColumnIndex(columns[2])));
+               }while(section.moveToNext());
+           }
+           section.close();
         }
         db.close();
     }

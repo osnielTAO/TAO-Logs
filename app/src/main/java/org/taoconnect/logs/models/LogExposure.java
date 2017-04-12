@@ -42,6 +42,20 @@ public class LogExposure implements LogInterface {
             R.layout.longresponse_questionary,
     };
 
+    private final String INIT_TEMP = "CREATE TABLE IF NOT EXISTS " + InitialSchema.TABLE_NAME_EXPOSURE_LOG + "Temp "
+            + "( " + InitialSchema.WORRY_SITUATION +  " TEXT,"
+            + InitialSchema.WORST_OUTCOME + " TEXT,"
+            + InitialSchema.SUDS_PRIOR + " INTEGER,"
+            + InitialSchema.SUDS_MAX + " INTEGER,"
+            + InitialSchema.SUDS_AFTER+ " INTEGER,"
+            + InitialSchema.SUDS_END + " INTEGER,"
+            + InitialSchema.SYMPTONS_DURING + " TEXT,"
+            + InitialSchema.ALTERNATIVE_OUTCOMES + " TEXT)";
+
+    private final String COPY_TABLE_TO_PERMANENT = "INSERT INTO " + InitialSchema.TABLE_NAME_EXPOSURE_LOG + " SELECT * FROM " + InitialSchema.TABLE_NAME_EXPOSURE_LOG + "Temp ";
+
+    private final String DROP_TEMP_TABLE = "DROP TABLE IF EXISTS " + InitialSchema.TABLE_NAME_EXPOSURE_LOG + "Temp ";
+
     public int[] getResources() {
         return resources;
     }
@@ -51,21 +65,30 @@ public class LogExposure implements LogInterface {
     public LogExposure(Context context) {
         this.context = context;
     }
+
     @Override
-    public void insertToDB() {
+    public void insertToTempDB(boolean isPermanentDb) {
         MySQLiteHelper mHelper = new MySQLiteHelper(context);
         SQLiteDatabase db = mHelper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(InitialSchema.WORRY_SITUATION, getWorrySituation());
-        values.put(InitialSchema.WORST_OUTCOME, getWorstOutcome());
-        values.put(InitialSchema.SUDS_PRIOR, getSUDSPrior());
-        values.put(InitialSchema.SUDS_MAX, getSUDSMax());
-        values.put(InitialSchema.SUDS_AFTER, getSUDSAfter());
-        values.put(InitialSchema.SUDS_END, getSUDSEnd());
-        values.put(InitialSchema.SYMPTONS_DURING, getSymptons());
-        values.put(InitialSchema.ALTERNATIVE_OUTCOMES, getAlternative());
+        if(!isPermanentDb) {
+            db.execSQL(INIT_TEMP);
+            ContentValues values = new ContentValues();
 
-        long newRow = db.insert(getTableName(), null, values);
+            values.put(InitialSchema.WORRY_SITUATION, getWorrySituation());
+            values.put(InitialSchema.WORST_OUTCOME, getWorstOutcome());
+            values.put(InitialSchema.SUDS_PRIOR, getSUDSPrior());
+            values.put(InitialSchema.SUDS_MAX, getSUDSMax());
+            values.put(InitialSchema.SUDS_AFTER, getSUDSAfter());
+            values.put(InitialSchema.SUDS_END, getSUDSEnd());
+            values.put(InitialSchema.SYMPTONS_DURING, getSymptons());
+            values.put(InitialSchema.ALTERNATIVE_OUTCOMES, getAlternative());
+            long newRow = db.insert(InitialSchema.TABLE_NAME_EXPOSURE_LOG + "Temp ", null, values);
+        }
+        else{
+            db.execSQL(COPY_TABLE_TO_PERMANENT);
+            db.execSQL(DROP_TEMP_TABLE);
+        }
+        db.close();
     }
 
     public String getWorrySituation() {

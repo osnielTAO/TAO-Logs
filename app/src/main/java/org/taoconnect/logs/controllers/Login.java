@@ -73,6 +73,7 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
     static final String DEFAULT_KEY_NAME = "default_key";
     private boolean useFingerprint;
     private boolean isFingerDialogShown = false;
+    private boolean firstLogin;
 
     private SharedPreferences mSharedPreferences;
     final Context context = this;
@@ -114,6 +115,7 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         useFingerprint = mSharedPreferences.getBoolean(getString(R.string.use_fingerprint_to_authenticate_key), false);
+        firstLogin = mSharedPreferences.getBoolean(getString(R.string.first_time_login), true);
 
         if(useFingerprint)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -190,6 +192,9 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
             public void onResponse(String response){
                 Log.e("response ", response);
                 if(response.equals("\"true\"")) {
+                    SharedPreferences.Editor editor = mSharedPreferences.edit();
+                    editor.putBoolean(getString(R.string.first_time_login), false);
+                    editor.apply();
                     login();
                     Log.e("Update", "Updated isAuthenticated");
                 }
@@ -230,7 +235,7 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
     @SuppressWarnings({"MissingPermission"})
     private void checkFingerprint(){
         fingerprintManager = (FingerprintManager) getSystemService(Context.FINGERPRINT_SERVICE);
-        if (fingerprintManager.isHardwareDetected()) {
+        if (fingerprintManager.isHardwareDetected() && !firstLogin) {
             mFAB.setVisibility(View.VISIBLE);
             if (!fingerprintManager.hasEnrolledFingerprints()) {
                 AlertDialog.Builder mBuilder = new AlertDialog.Builder(context);

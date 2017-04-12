@@ -21,6 +21,7 @@ import android.widget.Toast;
 import org.taoconnect.logs.tools.R;
 
 //TODO: manage screen rotations
+//TODO: look at attach problem when clicking on cancel
 public class FingerprintDialog extends DialogFragment implements FingerprintUihelper.Callback {
 
     private Button mCancelButton;

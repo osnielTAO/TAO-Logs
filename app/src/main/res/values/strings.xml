@@ -79,4 +79,8 @@
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="submitVerify">Are you ready to submit?</string>
     <string name="submit">Submit</string>
+    <string name="first_time_login">first_time_login</string>
+    <string name="errorMessageMultiChoice">Please select something</string>
+    <string name="errorMessageEntry">Please enter your response</string>
+    <string name="errorMessageSingleChoice">Please select your choice</string>
 </resources>

@@ -44,6 +44,7 @@
         android:layout_marginRight="20dp"
         android:layout_marginBottom="20dp"
         android:calendarViewShown="false"
-        android:visibility="visible">
+        android:visibility="visible"
+        android:onClick="setDateAsClicked">
     </DatePicker>
 </RelativeLayout>

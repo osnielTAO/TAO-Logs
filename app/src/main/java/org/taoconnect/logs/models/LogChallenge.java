@@ -39,6 +39,24 @@ public class LogChallenge implements LogInterface {
             "Challenges to your Unhealthy Assumptions",
             "Unhealthy Core Beliefs",
             "Alternate way of viewing the situation"};
+    private final String INIT_TEMP = "CREATE TABLE IF NOT EXISTS" + InitialSchema.TABLE_NAME_CHALLENGE_LOG + "Temp "
+            + "( " + InitialSchema.DATE_SELECTED  +  " TEXT,"
+            + InitialSchema.TIME_SELECTED + " TEXT,"
+            + InitialSchema.ANXIETY_LEVEL + " INTEGER,"
+            + InitialSchema.ANXIETY_EVENT + " TEXT,"
+            + InitialSchema.SPECIFIC_WORRY + " TEXT,"
+            + InitialSchema.TRIGGERS + " TEXT,"
+            + InitialSchema.ACTION_TAKEN + "TEXT,"
+            + InitialSchema.OUTCOME + " TEXT,"
+            + InitialSchema.UNH_ASSUMPTIONS + " TEXT,"
+            + InitialSchema.CHALLENGES + " TEXT,"
+            + InitialSchema.CORE_BELIEVES + " TEXT,"
+            + InitialSchema.ALTERNATE_VIEW + " TEXT)";
+
+    private final String COPY_TABLE_TO_PERMANENT = "INSERT INTO " + InitialSchema.TABLE_NAME_CHALLENGE_LOG + " SELECT * FROM " + InitialSchema.TABLE_NAME_CHALLENGE_LOG + "Temp ";
+
+    private final String DROP_TEMP_TABLE = "DROP TABLE IF EXISTS " + InitialSchema.TABLE_NAME_CHALLENGE_LOG + "Temp ";
+
     private int[] resources={R.layout.datepicker_questionary,
             R.layout.timepicker_questionary,
             R.layout.slider_questionary,
@@ -64,23 +82,33 @@ public class LogChallenge implements LogInterface {
         this.context = context;
     }
     @Override
-    public void insertToDB() {
+    public void insertToTempDB(boolean isPermanentDb) {
         MySQLiteHelper mHelper = new MySQLiteHelper(context);
         SQLiteDatabase db = mHelper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(InitialSchema.DATE_SELECTED, getDateSelected());
-        values.put(InitialSchema.TIME_SELECTED, getTimeSelected());
-        values.put(InitialSchema.ANXIETY_LEVEL, getAnxietyLevel());
-        values.put(InitialSchema.ANXIETY_EVENT, getAnxietyEvent());
-        values.put(InitialSchema.SPECIFIC_WORRY, getSpecificWorry());
-        values.put(InitialSchema.TRIGGERS, getTriggers());
-        values.put(InitialSchema.ACTION_TAKEN, getActionTaken());
-        values.put(InitialSchema.OUTCOME, getOutcome());
-        values.put(InitialSchema.UNH_ASSUMPTIONS, getAssumptions());
-        values.put(InitialSchema.CHALLENGES, getChallenges());
-        values.put(InitialSchema.CORE_BELIEVES, getCoreBelieves());
-        values.put(InitialSchema.ALTERNATE_VIEW, getAlternateView());
-        long newRow = db.insert(getTableName(), null, values);
+        if(!isPermanentDb) {
+            db.execSQL(INIT_TEMP);
+            ContentValues values = new ContentValues();
+
+            values.put(InitialSchema.DATE_SELECTED, getDateSelected());
+            values.put(InitialSchema.TIME_SELECTED, getTimeSelected());
+            values.put(InitialSchema.ANXIETY_LEVEL, getAnxietyLevel());
+            values.put(InitialSchema.ANXIETY_EVENT, getAnxietyEvent());
+            values.put(InitialSchema.SPECIFIC_WORRY, getSpecificWorry());
+            values.put(InitialSchema.TRIGGERS, getTriggers());
+            values.put(InitialSchema.ACTION_TAKEN, getActionTaken());
+            values.put(InitialSchema.OUTCOME, getOutcome());
+            values.put(InitialSchema.UNH_ASSUMPTIONS, getAssumptions());
+            values.put(InitialSchema.CHALLENGES, getChallenges());
+            values.put(InitialSchema.CORE_BELIEVES, getCoreBelieves());
+            values.put(InitialSchema.ALTERNATE_VIEW, getAlternateView());
+
+            long newRow = db.insert(InitialSchema.TABLE_NAME_CHALLENGE_LOG + "Temp ", null, values);
+        }
+        else{
+            db.execSQL(COPY_TABLE_TO_PERMANENT);
+            db.execSQL(DROP_TEMP_TABLE);
+        }
+        db.close();
     }
 
     public String getTriggers() {

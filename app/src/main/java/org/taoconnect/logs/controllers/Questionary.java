@@ -17,6 +17,8 @@ import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -24,6 +26,7 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import org.taoconnect.logs.models.LogAnxietyMonitoring;
 import org.taoconnect.logs.models.LogChallenge;
@@ -33,8 +36,6 @@ import org.taoconnect.logs.tools.R;
 
 import java.util.ArrayList;
 import java.util.List;
-
-
 
 public class Questionary extends AppCompatActivity {
 
@@ -52,7 +53,12 @@ public class Questionary extends AppCompatActivity {
     private static int itr = 0;
     private static int prevPos=0;
     private static boolean movingLeft = false;
-
+    private boolean dateClicked = false;
+    private boolean timeClicked = false;
+    private boolean barClicked = false;
+    private boolean isPreviousFilled;
+    private boolean canSwipe = false;
+    private boolean usingLevel0= false;
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -109,9 +115,12 @@ public class Questionary extends AppCompatActivity {
             int section = getArguments().getInt(ARG_SECTION_NUMBER);
             if(section == count){
                 rootView = inflater.inflate(R.layout.submit_questionary, container, false);
+                int id = R.layout.submit_questionary;
+                rootView.setId(Math.abs(id));
             }
             else {
                 rootView = inflater.inflate(layouts[section-1], container, false);
+                rootView.setId(layouts[section-1]);
                 if(layouts[section-1] == R.layout.single_choice_questionary){
                     ListView list = (ListView) rootView.findViewById(R.id.singlechoices);
                     ArrayAdapter<String> adapter = new ArrayAdapter<String>(rootView.getContext(),android.R.layout.simple_list_item_single_choice,
@@ -138,8 +147,22 @@ public class Questionary extends AppCompatActivity {
 
             }
 
-            if(!movingLeft) // To avoid duplicates when cycling back
+            if(views.size() != 0) { // To avoid duplicates when cycling back
+                boolean isThere = false;
+                for (int position = 0; position < views.size(); position++){  // Going back or overriding some view
+                    if (views.get(position).getId() == rootView.getId()) {
+                        views.set(position, rootView);
+                        isThere = true;
+                    }
+                }
+                if(!isThere){
+                    views.add(rootView);
+                }
+            }
+            else{  // Start: list is initially empty
                 views.add(rootView);
+            }
+
             return rootView;
         }
     }
@@ -166,21 +189,181 @@ public class Questionary extends AppCompatActivity {
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener(){
             @Override
             public void onPageSelected(int position) {
-                Log.e("Event", "Page changed " + position);
+                if(position != 0){
+                    isPreviousFilled = isFulfilled(position-1);
+                }
                 prevPos = itr;
                 itr = position;
                 if(prevPos>itr){
                     movingLeft = true;
-                    Log.e("Event", "Moving left");
                 }
                 else{
                     movingLeft = false;
                 }
-                setParameters(position, log);
+                if(!isPreviousFilled){
+                    mViewPager.setCurrentItem(itr-1);
+                }
+                else{
+                    setParameters(position, log);
+                }
             }
         });
 
+
         itr=0;
+    }
+
+    public void setDateAsClicked(View v){
+        dateClicked = true;
+    }
+    public void setTimeAsClicked(View v){
+        timeClicked = true;
+    }
+
+    private void showAnim(View v){
+        Animation a = AnimationUtils.loadAnimation(this, R.anim.shake);
+        a.reset();
+        TextView error = (TextView) v.findViewById(R.id.errorMessage);
+        error.setVisibility(View.VISIBLE);
+        error.clearAnimation();
+        error.startAnimation(a);
+    }
+
+
+    private boolean isFulfilled(int currentPos){
+        View v = views.get(currentPos);
+        int layout = v.getId();
+
+        switch(layout){
+            case R.layout.datepicker_questionary:
+                if(!dateClicked){
+                    AlertDialog.Builder mBuilder = new AlertDialog.Builder(this);
+                    mBuilder.setTitle("Enter a date");
+                    mBuilder.setMessage("Do you want to use today's date?");
+                    mBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            canSwipe = true;
+                        }
+                    });
+                    mBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Toast.makeText(getBaseContext(), "Select a date", Toast.LENGTH_SHORT).show();
+                            canSwipe = false;
+                            dialog.cancel();
+                       }
+                    });
+                    mBuilder.setCancelable(false);
+                    AlertDialog mDialog = mBuilder.create();
+                    mDialog.show();
+                }
+                break;
+            case R.layout.timepicker_questionary:
+                if(!timeClicked){
+                    AlertDialog.Builder mBuilder = new AlertDialog.Builder(this);
+                    mBuilder.setTitle("Enter a time");
+                    mBuilder.setMessage("Do you want to use the current time?");
+                    mBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            canSwipe = true;
+                        }
+                    });
+                    mBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Toast.makeText(getBaseContext(), "Select a time", Toast.LENGTH_SHORT).show();
+                            canSwipe = false;
+                            dialog.cancel();
+                        }
+                    });
+                    mBuilder.setCancelable(false);
+                    AlertDialog mDialog = mBuilder.create();
+                    mDialog.show();
+                }
+                break;
+            case R.layout.longresponse_questionary:
+                EditText entry1 = (EditText) v.findViewById(R.id.entry);
+                if(entry1.getText().toString().matches("")){
+                    canSwipe = false;
+                    showAnim(v);
+                }
+                else{
+                    TextView errorText = (TextView) v.findViewById(R.id.errorMessage);
+                    errorText.setVisibility(View.INVISIBLE);
+                    canSwipe = true;
+                }
+                break;
+            case R.layout.multiple_choice_questionary:
+                ListView multipleList = (ListView) v.findViewById(R.id.choices);
+                SparseBooleanArray checked = multipleList.getCheckedItemPositions();
+                if(checked == null) //Nothing selected
+                {
+                    canSwipe = false;
+                    showAnim(v);
+                }
+                else{
+                    TextView errorText = (TextView) v.findViewById(R.id.errorMessage);
+                    errorText.setVisibility(View.INVISIBLE);
+                    canSwipe = true;
+                }
+                break;
+            case R.layout.single_choice_questionary:
+                ListView singleList = (ListView) v.findViewById(R.id.singlechoices);
+                int pos = singleList.getCheckedItemPosition();
+                if(pos == -1) //Nothing selected
+                {
+                    canSwipe = false;
+                    showAnim(v);
+                }
+                else{
+                    TextView errorText = (TextView) v.findViewById(R.id.errorMessage);
+                    errorText.setVisibility(View.INVISIBLE);
+                    canSwipe = true;
+                }
+                break;
+            case R.layout.short_response_questionary:
+                EditText entry2 = (EditText) v.findViewById(R.id.entry);
+                if(entry2.getText().toString().matches("")){
+                    canSwipe = false;
+                    showAnim(v);
+                }
+                else{
+                    TextView errorText = (TextView) v.findViewById(R.id.errorMessage);
+                    errorText.setVisibility(View.INVISIBLE);
+                    canSwipe = true;
+                }
+                break;
+            case R.layout.slider_questionary:  //TODO: Give exclusivity/focus to the dialog
+                SeekBar progress = (SeekBar) v.findViewById(R.id.seekBar);
+                if(progress.getProgress() == 0 && !usingLevel0){
+                    AlertDialog.Builder mBuilder = new AlertDialog.Builder(this);
+                    mBuilder.setTitle("Select your level");
+                    mBuilder.setMessage("Do you want to use level 0?");
+                    mBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            usingLevel0 = true;
+                            canSwipe = true;
+                        }
+                    });
+                    mBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Toast.makeText(getBaseContext(), "Select a level", Toast.LENGTH_SHORT).show();
+                            canSwipe = false;
+                            dialog.cancel();
+                        }
+                    });
+                    mBuilder.setCancelable(false);
+                    AlertDialog mDialog = mBuilder.create();
+                    mDialog.show();
+                }
+                else canSwipe = true;
+                break;
+        }
+        return canSwipe;
     }
 
     private void setParameters(int pos, String log){
@@ -387,7 +570,9 @@ public class Questionary extends AppCompatActivity {
                 break;
         }
     }
+
     private void createLogClass(String log){
+        Log.e("Event", "Class created");
         switch (log){
             case "Anxiety Monitoring Log": logAnxiety = new LogAnxietyMonitoring(this);
                 layouts = logAnxiety.getResources();
@@ -418,7 +603,6 @@ public class Questionary extends AppCompatActivity {
         }
     }
 
-
     public void displayClosingDialog(View v){
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(this);
         mBuilder.setTitle("Are you sure you want to exit?");
@@ -444,14 +628,20 @@ public class Questionary extends AppCompatActivity {
 
     private void goToLogPicker(){
         Intent close = new Intent(this, LogPicker.class);
-        switch(log){
-            case "Anxiety Monitoring Log": logAnxiety.insertToDB();
+        boolean canGoPermanentDB = views.size() == count;
+        Log.e("Event", "Wrote to DB");
+        switch (log) {
+            case "Anxiety Monitoring Log":
+                logAnxiety.insertToTempDB(canGoPermanentDB);
                 break;
-            case "Relaxation Log": logRelaxation.insertToDB();
+            case "Relaxation Log":
+                logRelaxation.insertToTempDB(canGoPermanentDB);
                 break;
-            case "Challenge Log": logChallenge.insertToDB();
+            case "Challenge Log":
+                logChallenge.insertToTempDB(canGoPermanentDB);
                 break;
-            case "Exposure Log": logExposure.insertToDB();
+            case "Exposure Log":
+                logExposure.insertToTempDB(canGoPermanentDB);
                 break;
             case "Feeling Log":
             case "Activation Plan":
@@ -463,11 +653,14 @@ public class Questionary extends AppCompatActivity {
             case "Acceptance and Commitment Therapy":
             case "Cognitive Behavioral":
                 break;
+
         }
         close.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        views.clear();
         startActivity(close);
         finish();
     }
+
 
     @Override
     public void onBackPressed(){

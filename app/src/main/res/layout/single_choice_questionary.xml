@@ -37,4 +37,13 @@
         android:layout_below="@id/header"
         android:padding="16dp"
         />
+    <TextView
+        android:id="@+id/errorMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/errorMessageSingleChoice"
+        android:textColor="@color/warning_color"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:visibility="invisible"/>
 </RelativeLayout>
