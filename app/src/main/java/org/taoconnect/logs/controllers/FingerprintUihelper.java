@@ -10,7 +10,7 @@ import android.widget.TextView;
 import org.taoconnect.logs.tools.R;
 
 /**
- * Created by croxx219 on 3/22/17.
+ * A class to manage UI changes and gives support to FingerprintDialog
  */
 
 @RequiresApi(api = Build.VERSION_CODES.M)

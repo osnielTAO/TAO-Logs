@@ -34,6 +34,7 @@ import org.taoconnect.logs.models.LogExposure;
 import org.taoconnect.logs.models.LogRelaxation;
 import org.taoconnect.logs.tools.R;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,15 +42,16 @@ public class Questionary extends AppCompatActivity {
 
     private static int count;  //Number of questions
     private SectionsPagerAdapter mSectionsPagerAdapter;
-    private ViewPager mViewPager;
-    private String log;
-    private LogAnxietyMonitoring logAnxiety;
-    private LogChallenge logChallenge;
-    private LogExposure logExposure;
-    private LogRelaxation logRelaxation;
+    private static ViewPager mViewPager;
+    private static String log;
+    private static String action;
+    private static LogAnxietyMonitoring logAnxiety;
+    private static LogChallenge logChallenge;
+    private static LogExposure logExposure;
+    private static LogRelaxation logRelaxation;
     private static int[] layouts;
     private static String[] headers;
-    private static List<View> views = new ArrayList<View>();
+    private static List<View> views = new ArrayList<View>();      // Holds all the view objects for every fragment created
     private static int itr = 0;
     private static int prevPos=0;
     private static boolean movingLeft = false;
@@ -111,6 +113,7 @@ public class Questionary extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView;
+            // Each rootView has its own id to determine which layout holds the widget that needs to be saved/updated
             int section = getArguments().getInt(ARG_SECTION_NUMBER);
             if(section == count){
                 rootView = inflater.inflate(R.layout.submit_questionary, container, false);
@@ -120,13 +123,13 @@ public class Questionary extends AppCompatActivity {
             else {
                 rootView = inflater.inflate(layouts[section-1], container, false);
                 rootView.setId(layouts[section-1]);
-                if(layouts[section-1] == R.layout.single_choice_questionary){
+                if(layouts[section-1] == R.layout.single_choice_questionary){   // A single choice listview
                     ListView list = (ListView) rootView.findViewById(R.id.singlechoices);
                     ArrayAdapter<String> adapter = new ArrayAdapter<String>(rootView.getContext(),android.R.layout.simple_list_item_single_choice,
                             getResources().getStringArray(R.array.singleChoiceRelaxationLog));
                     list.setAdapter(adapter);
                     list.setSelection(0);
-                } else if (layouts[section-1] == R.layout.multiple_choice_questionary) {
+                } else if (layouts[section-1] == R.layout.multiple_choice_questionary) {   // A multiple choice listview
                     ArrayAdapter<String> adapter;
                     ListView list = (ListView) rootView.findViewById(R.id.choices);
                     if(headers[section-1].equals("Unhealthy Assumptions")) {
@@ -134,19 +137,19 @@ public class Questionary extends AppCompatActivity {
                                 getResources().getStringArray(R.array.unhealthyAssumptions));
                         list.setAdapter(adapter);
                     }
-                    else if(headers[section-1].equals("Unhealthy Core Beliefs")){
+                    else if(headers[section-1].equals("Unhealthy Core Beliefs")){       // A multiple choice listview
                         adapter = new ArrayAdapter<String>(rootView.getContext(), android.R.layout.simple_list_item_multiple_choice,
                                 getResources().getStringArray(R.array.unhealthyCoreBeliefs));
                         list.setAdapter(adapter);
                     }
 
                 }
-                TextView header = (TextView) rootView.findViewById(R.id.header);
+                TextView header = (TextView) rootView.findViewById(R.id.header);     // Question header
                 header.setText(headers[section-1]);
 
             }
 
-            if(views.size() != 0) { // To avoid duplicates when cycling back
+            if(views.size() != 0) { // To avoid duplicates when cycling back/moving left
                 boolean isThere = false;
                 for (int position = 0; position < views.size(); position++){  // Going back or overriding some view
                     if (views.get(position).getId() == rootView.getId()) {
@@ -156,10 +159,18 @@ public class Questionary extends AppCompatActivity {
                 }
                 if(!isThere){
                     views.add(rootView);
+                    Log.e("Event", "Added " + rootView.getId());
+                    int id = R.layout.submit_questionary;
+                    if(action.equals("Continue") && rootView.getId() != Math.abs(id)){  // Avoid working with the last layout
+                        goToLastView(log, itr);
+                    }
                 }
             }
             else{  // Start: list is initially empty
                 views.add(rootView);
+                if(action.equals("Continue")){
+                    goToLastView(log, itr);
+                }
             }
 
             return rootView;
@@ -174,9 +185,9 @@ public class Questionary extends AppCompatActivity {
 
         Intent receivedIntent = getIntent();
         Bundle extras = receivedIntent.getExtras();
-        count = extras.getInt("Count");
+        count = extras.getInt("Count");     // Total number of questions
         log = extras.getString("Log");
-
+        action = extras.getString("Action");
         createLogClass(log);
 
         // Create the adapter that will return a fragment for each of the three
@@ -189,13 +200,15 @@ public class Questionary extends AppCompatActivity {
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener(){
             @Override
             public void onPageSelected(int position) {
+                // Not at the first screen
                 if(position != 0){
                     isPreviousFilled = isFulfilled(position-1);
                 }
                 prevPos = itr;
                 itr = position;
-                if(!movingLeft) {
-                    Log.e("Event", "Wrote to table");
+                if(!movingLeft && !action.equals("Continue")) { //Swiping left, moving to the right of the screen
+                    // Don't save if action is continue. I am manually swiping to fill in the views, writing here in that case overrides the
+                    // table values necessary to fill the views.
                     writeToTable(false);
                 }
 
@@ -206,24 +219,21 @@ public class Questionary extends AppCompatActivity {
                     movingLeft = false;
                 }
 
-
+                // Don't let user move to next view
                 if(!isPreviousFilled){
                     mViewPager.setCurrentItem(itr-1);
                 }
-                else{
+                else{  // Save information entered by the user
                     setParameters(position, log);
                 }
+
+
             }
         });
-
-        String action = extras.getString("Action");
-        if(action.equals("Continue")){
-            goToLastView();
-        }
-
-        itr=0;
+        itr=0;  // Restart static variable with every call to this activity
     }
 
+    // TODO: Figure out swiping in datepicker, timepicker and seekbar
     public void setDateAsClicked(View v){
         dateClicked = true;
     }
@@ -232,6 +242,7 @@ public class Questionary extends AppCompatActivity {
         timeClicked = true;
     }
 
+    // An error message
     private void showAnim(View v){
         Animation a = AnimationUtils.loadAnimation(this, R.anim.shake);
         a.reset();
@@ -241,7 +252,7 @@ public class Questionary extends AppCompatActivity {
         error.startAnimation(a);
     }
 
-    // This methods stops the user from moving to the next one until the view is filled
+    // This methods is needed to stop the user from moving to the next one until the view is filled
     private boolean isFulfilled(int currentPos){
         View v = views.get(currentPos);
         int layout = v.getId();
@@ -563,11 +574,11 @@ public class Questionary extends AppCompatActivity {
                         break;
                     case "Symptons during the exercise":
                         EditText entry2 = (EditText) v.findViewById(R.id.entry);
-                        logChallenge.setAlternateView(entry2.getText().toString());
+                        logExposure.setSymptons(entry2.getText().toString());
                         break;
                     case "Alternative outcomes":
                         EditText entry3 = (EditText) v.findViewById(R.id.entry);
-                        logChallenge.setAlternateView(entry3.getText().toString());
+                        logExposure.setAlternative(entry3.getText().toString());
                         break;
                 }
                 break;
@@ -584,6 +595,7 @@ public class Questionary extends AppCompatActivity {
         }
     }
 
+    // Instantiate the correct object depending on the intent sent
     private void createLogClass(String log){
         switch (log){
             case "Anxiety Monitoring Log": logAnxiety = new LogAnxietyMonitoring(this);
@@ -617,9 +629,217 @@ public class Questionary extends AppCompatActivity {
 
     // If the action was continue, this method populates all the views the user already entered
     // and opens the next view to be filled.
-    private void goToLastView(){
-
+    private static void goToLastView(String log, int pos){
+        ArrayList<String> colValues = new ArrayList<String>();
+        switch (log){
+            case "Anxiety Monitoring Log": colValues = logAnxiety.getColValues();
+                break;
+            case "Relaxation Log": colValues = logRelaxation.getColValues();
+                break;
+            case "Challenge Log": colValues = logChallenge.getColValues();
+                break;
+            case "Exposure Log": colValues = logExposure.getColValues();
+                break;
+            case "Feeling Log":
+            case "Activation Plan":
+            case "Rumination Record":
+            case "Letting Go Exercise Log":
+            case "Mindfulness Log":
+            case "Anxiety Logs":
+            case "Behavioral Activation":
+            case "Acceptance and Commitment Therapy":
+            case "Cognitive Behavioral":
+                break;
+        }
+        fillWidgets(colValues.get(pos));
     }
+
+    // Manually fills the widget for the view from which this method was called. itr determines the position of such view
+    private static void fillWidgets(String entry){
+            View v = views.get(itr);
+            TextView header = (TextView) v.findViewById(R.id.header);
+            String tag = header.getText().toString();
+            Log.e("Event", tag);
+            switch (log) {
+                case "Anxiety Monitoring Log":
+                    switch (tag) {
+                        case "Date of anxiety":
+                            String[] date = entry.split("/");
+                            DatePicker datePicker = (DatePicker) v.findViewById(R.id.datePicker);
+                            datePicker.updateDate(Integer.parseInt(date[2]), Integer.parseInt(date[0]), Integer.parseInt(date[1]));
+                            break;
+                        case "Time of Anxiety Event":
+                            String[] time = entry.split(":");
+                            TimePicker timePicker = (TimePicker) v.findViewById(R.id.timePicker);
+                            timePicker.setCurrentHour(Integer.parseInt(time[0]));
+                            timePicker.setCurrentMinute(Integer.parseInt(time[1]));
+                            break;
+                        case "Anxiety Level":
+                            SeekBar progress = (SeekBar) v.findViewById(R.id.seekBar);
+                            progress.setProgress(Integer.parseInt(entry));
+                            break;
+                        case "Anxiety Event: Describe the conditions surrounding the event":
+                            EditText entry1 = (EditText) v.findViewById(R.id.entry);
+                            entry1.setText(entry);
+                            break;
+                        case "Specific Worry: describe the worry that arose from the conditions you describe above.":
+                            EditText entry2 = (EditText) v.findViewById(R.id.entry);
+                            entry2.setText(entry);
+                            break;
+                        case "Possible Triggers":
+                            EditText entry3 = (EditText) v.findViewById(R.id.entry);
+                            entry3.setText(entry);
+                            break;
+                        case "What did you do or not do because of the worry":
+                            EditText entry4 = (EditText) v.findViewById(R.id.entry);
+                            entry4.setText(entry);
+                            break;
+                        case "Outcome of the situation":
+                            EditText entry5 = (EditText) v.findViewById(R.id.entry);
+                            entry5.setText(entry);
+                            break;
+                    }
+                    break;
+                case "Relaxation Log":
+                    switch (tag) {
+                        case "Thoughts, emotions, worries BEFORE relaxation:":
+                            EditText entry1 = (EditText) v.findViewById(R.id.entry);
+                            entry1.setText(entry);
+                            Log.e("Event", "Trying to add: " + entry);
+                            break;
+                        case "Anxiety Level:":
+                            SeekBar progress = (SeekBar) v.findViewById(R.id.seekBar);
+                            progress.setProgress(Integer.parseInt(entry));
+                            break;
+                        case "Select a Relaxation Exercise:":
+                            ListView list = (ListView) v.findViewById(R.id.singlechoices);
+                            for(int i =0; i < list.getCount(); i++){
+                                if(list.getItemAtPosition(i).toString().equals(entry)){
+                                    list.setItemChecked(i, true);
+                                }
+                            }
+                            break;
+                    }
+                    break;
+                case "Challenge Log":
+                    switch (tag) {
+                        case "Date of anxiety":
+                            String[] date = entry.split("/");
+                            DatePicker datePicker = (DatePicker) v.findViewById(R.id.datePicker);
+                            datePicker.updateDate(Integer.parseInt(date[2]), Integer.parseInt(date[0]), Integer.parseInt(date[1]));
+                            break;
+                        case "Time of Anxiety Event":
+                            String[] time = entry.split(":");
+                            TimePicker timePicker = (TimePicker) v.findViewById(R.id.timePicker);
+                            timePicker.setCurrentHour(Integer.parseInt(time[0]));
+                            timePicker.setCurrentMinute(Integer.parseInt(time[1]));
+                            break;
+                        case "Anxiety Level":
+                            SeekBar progress = (SeekBar) v.findViewById(R.id.seekBar);
+                            progress.setProgress(Integer.parseInt(entry));
+                            break;
+                        case "Anxiety Event: Describe the conditions surrounding the event":
+                            EditText entry1 = (EditText) v.findViewById(R.id.entry);
+                            entry1.setText(entry);
+                            break;
+                        case "Specific Worry: describe the worry that arose from the conditions you describe above.":
+                            EditText entry2 = (EditText) v.findViewById(R.id.entry);
+                            entry2.setText(entry);
+                            break;
+                        case "Possible Triggers":
+                            EditText entry3 = (EditText) v.findViewById(R.id.entry);
+                            entry3.setText(entry);
+                            break;
+                        case "What did you do or not do because of the worry":
+                            EditText entry4 = (EditText) v.findViewById(R.id.entry);
+                            entry4.setText(entry);
+                            break;
+                        case "Outcome of the situation":
+                            EditText entry5 = (EditText) v.findViewById(R.id.entry);
+                            entry5.setText(entry);
+                            break;
+                        case "Unhealthy Assumptions":
+                            ListView list = (ListView) v.findViewById(R.id.choices);
+                            String[] selectedItems = entry.split(",");
+                            for(int i =0; i < list.getCount(); i++){
+                                for(String item : selectedItems) {
+                                    if (list.getItemAtPosition(i).toString().equals(item)) {
+                                        list.setItemChecked(i, true);
+                                    }
+                                }
+                            }
+                            break;
+                        case "Challenges to your Unhealthy Assumptions":
+                            EditText entry6 = (EditText) v.findViewById(R.id.entry);
+                            entry6.setText(entry);
+                            break;
+                        case "Unhealthy Core Beliefs":
+                            ListView list2 = (ListView) v.findViewById(R.id.choices);
+                            String[] selected = entry.split(",");
+                            for(int i =0; i < list2.getCount(); i++){
+                                for(String item : selected) {
+                                    if (list2.getItemAtPosition(i).toString().equals(item)) {
+                                        list2.setItemChecked(i, true);
+                                    }
+                                }
+                            }
+                            break;
+                        case "Alternate way of viewing the situation":
+                            EditText entry7 = (EditText) v.findViewById(R.id.entry);
+                            entry7.setText(entry);
+                            break;
+                    }
+                    break;
+                case "Exposure Log":
+                    switch (tag) {
+                        case "Worry situation:":
+                            EditText entry1 = (EditText) v.findViewById(R.id.entry);
+                            entry1.setText(entry);
+                            break;
+                        case "Worst possible outcome":
+                            EditText entry4 = (EditText) v.findViewById(R.id.entry);
+                            entry4.setText(entry);
+                            break;
+                        case "SUDS prior to exposure":
+                            SeekBar progress1 = (SeekBar) v.findViewById(R.id.seekBar);
+                            progress1.setProgress(Integer.parseInt(entry));
+                            break;
+                        case "SUDS MAXIMUM during exposure":
+                            SeekBar progress2 = (SeekBar) v.findViewById(R.id.seekBar);
+                            progress2.setProgress(Integer.parseInt(entry));
+                            break;
+                        case "SUDS AFTER thinking of alternatives":
+                            SeekBar progress3 = (SeekBar) v.findViewById(R.id.seekBar);
+                            progress3.setProgress(Integer.parseInt(entry));
+                            break;
+                        case "SUDS at the end of the exercise":
+                            SeekBar progress4 = (SeekBar) v.findViewById(R.id.seekBar);
+                            progress4.setProgress(Integer.parseInt(entry));
+                            break;
+                        case "Symptons during the exercise":
+                            EditText entry2 = (EditText) v.findViewById(R.id.entry);
+                            entry2.setText(entry);
+                            break;
+                        case "Alternative outcomes":
+                            EditText entry3 = (EditText) v.findViewById(R.id.entry);
+                            entry3.setText(entry);
+                            break;
+                    }
+                    break;
+                case "Feeling Log":
+                case "Activation Plan":
+                case "Rumination Record":
+                case "Letting Go Exercise Log":
+                case "Mindfulness Log":
+                case "Anxiety Logs":
+                case "Behavioral Activation":
+                case "Acceptance and Commitment Therapy":
+                case "Cognitive Behavioral":
+                    break;
+            }
+            mViewPager.setCurrentItem(itr+1);
+    }
+
     // This methods writes to temp table if boolean is false otherwise it writes to permanent table
     private void writeToTable(boolean isPermanent){
         switch (log) {
@@ -656,6 +876,7 @@ public class Questionary extends AppCompatActivity {
         }
     }
 
+    // Submit button listener
     public void submitLog(View v){
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(this);
         mBuilder.setTitle("Are you ready to submit?");
@@ -681,6 +902,11 @@ public class Questionary extends AppCompatActivity {
         writeToTable(true);
     }
 
+    // Cancel button listener
+    public void dismissLog(View v){
+        goToLogPicker();
+    }
+    // Red X/Close button listener
     public void displayClosingDialog(View v){
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(this);
         mBuilder.setTitle("Are you sure you want to exit?");

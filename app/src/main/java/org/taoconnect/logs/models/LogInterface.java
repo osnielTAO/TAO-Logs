@@ -2,14 +2,17 @@ package org.taoconnect.logs.models;
 
 import android.database.sqlite.SQLiteDatabase;
 
+import java.util.ArrayList;
+
 /**
- * This is an interface for all the models to use. It gives the common method to be used by each model. Gets calle in Questionary.java
+ * This is an interface for all the models to use. It gives the common method to be used by each model. Gets called in Questionary.java
  */
 
 interface LogInterface {
-    int[] getResources() ;
+    int[] getResources() ;  // Returns the layouts in the object
     String[] getQuestions() ;
     void insertToTempDB();
     void insertToPermanentDB();
-    boolean hasTempTable();
+    boolean hasTempTable(); // Used to add the continue option in LogPicker
+    ArrayList<String> getColValues(); // Gets the values from the temp table to fill out the views when continue gets called
 }

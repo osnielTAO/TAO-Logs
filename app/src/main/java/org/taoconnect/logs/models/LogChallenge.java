@@ -9,6 +9,8 @@ import org.taoconnect.logs.databases.InitialSchema;
 import org.taoconnect.logs.databases.MySQLiteHelper;
 import org.taoconnect.logs.tools.R;
 
+import java.util.ArrayList;
+
 /**
  * Created by croxx219 on 4/5/17.
  */
@@ -91,6 +93,22 @@ public class LogChallenge implements LogInterface {
 
         db.close();
     }
+    @Override
+    public ArrayList<String> getColValues(){
+        MySQLiteHelper mHelper = new MySQLiteHelper(context);
+        SQLiteDatabase db = mHelper.getWritableDatabase();
+
+        ArrayList<String> values = new ArrayList<String>();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_CHALLENGE_LOG + "Temp", null);
+        String[] columns = cursor.getColumnNames();
+        while (cursor.moveToNext()) {
+            for(int i = 1; i< columns.length; i++){
+                values.add(cursor.getString(cursor.getColumnIndex(columns[i])));
+            }
+        }
+
+        return values;
+    }
 
     @Override
     public void insertToPermanentDB(){
@@ -112,6 +130,7 @@ public class LogChallenge implements LogInterface {
         values.put(InitialSchema.ALTERNATE_VIEW, getAlternateView());
 
         db.insert(InitialSchema.TABLE_NAME_CHALLENGE_LOG,null,values);
+        db.execSQL("DELETE FROM " + InitialSchema.TABLE_NAME_CHALLENGE_LOG + "Temp");
         db.close();
     }
     @Override

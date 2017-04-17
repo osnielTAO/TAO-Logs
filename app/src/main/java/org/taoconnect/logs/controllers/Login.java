@@ -63,9 +63,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
-/***********************************************
-/* My dev server  dev-01-us-w1.tao.local
-/***********************************************/
+
 public class Login extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
     public final int REQUEST_CODE = 0x1;
@@ -89,8 +87,6 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
     private EditText username;
     private EditText password;
 
-    private FingerprintDialog fragment;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,6 +98,7 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
         username = (EditText) findViewById(R.id.userName);
         password = (EditText) findViewById(R.id.passWord);
 
+        // Removes error message due to auth fail after being displayed
         username.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -121,16 +118,18 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
         mFAB = (FloatingActionButton) findViewById(R.id.fingerprintReader);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        useFingerprint = mSharedPreferences.getBoolean(getString(R.string.use_fingerprint_to_authenticate_key), false);
-        firstLogin = mSharedPreferences.getBoolean(getString(R.string.first_time_login), true);
+        useFingerprint = mSharedPreferences.getBoolean(getString(R.string.use_fingerprint_to_authenticate_key), false); // User wants to use fingerprint at login
+        firstLogin = mSharedPreferences.getBoolean(getString(R.string.first_time_login), true);  // First time authenticating, do not allow fingerprint auth
 
+
+        // If user wanted to use fingerprint then open dialog for fingerprint auth inmmediately
         if(useFingerprint)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                isFingerDialogShown = true;
+                isFingerDialogShown = true;  // User already saw the dialog, probably in last session
                 startAuthentication(mFAB.findFocus());
             }
-        keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
 
+        keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             if(!keyguardManager.isKeyguardSecure()){
                 AlertDialog.Builder mBuilder = new AlertDialog.Builder(context);
@@ -158,6 +157,9 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
         }
     }
 
+    // Intent that gets called after authentication through login button
+    // Lets the user know it can use fingerprint if it has never seen the fingerprint dialog before and
+    // hardware requirements are met (Implicitly deduced from FAB being visible), refer to line 267)
     private void login(){
         final Intent login = new Intent(getApplicationContext(), LogPicker.class);
         if(!isFingerDialogShown && (mFAB.getVisibility() == View.VISIBLE)){
@@ -188,6 +190,7 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
         }
     }
 
+    // Listener for login button
     public void verifyCredentials(View v){
         String user = username.getText().toString();
         String pass = password.getText().toString();
@@ -242,6 +245,7 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
         queue.add(mRequest);
     }
 
+    // Listener for FAB button
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void startAuthentication(View v) {
         generateKey();
@@ -255,6 +259,8 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
         }
     }
 
+
+    // Checks hardware requirements and that it is not first login
     @RequiresApi(api = Build.VERSION_CODES.M)
     @SuppressWarnings({"MissingPermission"})
     private void checkFingerprint(){

@@ -12,6 +12,8 @@ import org.taoconnect.logs.databases.InitialSchema;
 import org.taoconnect.logs.databases.MySQLiteHelper;
 import org.taoconnect.logs.tools.R;
 
+import java.util.ArrayList;
+
 /**
  * Created by croxx219 on 4/5/17.
 
@@ -67,6 +69,22 @@ public class LogRelaxation implements LogInterface {
     }
 
     @Override
+    public ArrayList<String> getColValues(){
+        MySQLiteHelper mHelper = new MySQLiteHelper(context);
+        SQLiteDatabase db = mHelper.getReadableDatabase();
+
+        ArrayList<String> values = new ArrayList<String>();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_RELAX_LOG + "Temp", null);
+        String[] columns = cursor.getColumnNames();
+        while (cursor.moveToNext()) {
+            for(int i = 1; i< columns.length; i++){
+                values.add(cursor.getString(cursor.getColumnIndex(columns[i])));
+            }
+        }
+        db.close();
+        return values;
+    }
+    @Override
     public boolean hasTempTable(){
         MySQLiteHelper mHelper = new MySQLiteHelper(context);
         SQLiteDatabase db = mHelper.getWritableDatabase();
@@ -102,6 +120,7 @@ public class LogRelaxation implements LogInterface {
         values.put(InitialSchema.ANXIETY_LEVEL, getAnxietyLevel());
 
         db.insert(InitialSchema.TABLE_NAME_RELAX_LOG,null,values);
+        db.execSQL("DELETE FROM " + InitialSchema.TABLE_NAME_RELAX_LOG + "Temp");
         db.close();
     }
 

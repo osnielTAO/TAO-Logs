@@ -65,8 +65,9 @@ public class FingerprintDialog extends DialogFragment implements FingerprintUihe
 
         mFingerprintContent = v.findViewById(R.id.fingerprint_container);
         mUseFingerprintFutureCheckBox = (CheckBox) v.findViewById(R.id.use_fingerprint_in_future_check);
+
         String message = getTag();
-        if(message == "true"){
+        if(message == "true"){  // User had previously checked marked the box
             mUseFingerprintFutureCheckBox.setChecked(true);
         }
         mFingerprintUiHelper = new FingerprintUihelper(mActivity.getSystemService(FingerprintManager.class), (ImageView) v.findViewById(R.id.fingerprint_icon),
@@ -101,6 +102,7 @@ public class FingerprintDialog extends DialogFragment implements FingerprintUihe
         mCryptoObject = cryptoObject;
     }
 
+    // Fingerprint recognized
     @Override
     public void onAuthenticated() {
         Toast.makeText(mActivity, "Fingerprint recognized", Toast.LENGTH_SHORT).show();

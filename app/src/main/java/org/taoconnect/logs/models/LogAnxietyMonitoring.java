@@ -10,6 +10,8 @@ import org.taoconnect.logs.databases.InitialSchema;
 import org.taoconnect.logs.databases.MySQLiteHelper;
 import org.taoconnect.logs.tools.R;
 
+import java.util.ArrayList;
+
 /**
  * Created by croxx219 on 4/5/17.
  */
@@ -55,18 +57,6 @@ public class LogAnxietyMonitoring implements LogInterface {
         this.context = context;
     }
 
-    public static LogAnxietyMonitoring newInstance(Context context, boolean isFromDB){
-        LogAnxietyMonitoring log = null;
-        if(isFromDB){
-            return log;
-            //TODO:Pull from database
-        }
-        else {
-            log = new LogAnxietyMonitoring(context);
-            return log;
-        }
-    }
-
     @Override
     public void insertToTempDB() {
         MySQLiteHelper mHelper = new MySQLiteHelper(context);
@@ -88,6 +78,22 @@ public class LogAnxietyMonitoring implements LogInterface {
     }
 
     @Override
+    public ArrayList<String> getColValues(){
+        MySQLiteHelper mHelper = new MySQLiteHelper(context);
+        SQLiteDatabase db = mHelper.getWritableDatabase();
+
+        ArrayList<String> values = new ArrayList<String>();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_ANX_MON_LOG + "Temp", null);
+        String[] columns = cursor.getColumnNames();
+        while (cursor.moveToNext()) {
+            for(int i = 1; i< columns.length; i++){
+                values.add(cursor.getString(cursor.getColumnIndex(columns[i])));
+            }
+        }
+
+        return values;
+    }
+    @Override
     public void insertToPermanentDB(){
         MySQLiteHelper mHelper = new MySQLiteHelper(context);
         SQLiteDatabase db = mHelper.getWritableDatabase();
@@ -103,6 +109,7 @@ public class LogAnxietyMonitoring implements LogInterface {
         values.put(InitialSchema.OUTCOME, getOutcome());
 
         db.insert(InitialSchema.TABLE_NAME_ANX_MON_LOG,null,values);
+        db.execSQL("DELETE FROM " + InitialSchema.TABLE_NAME_ANX_MON_LOG + "Temp");
         db.close();
     }
 

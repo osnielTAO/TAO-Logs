@@ -30,13 +30,8 @@ import java.util.List;
 // TODO: add accesibility labels
 
 public class LogPicker extends AppCompatActivity {
-    private Button startbutton;
-    private SharedPreferences mSharedPreferences;
-    private final String DBName = "tempLogs.db";
-    private SQLiteDatabase tempDB;
-    private boolean hasContinue;
     private Context context = this;
-    private String actionSelection, logSelection, moduleSelection;
+    private String actionSelection, logSelection;
     private Spinner logs, modules, action;
     private LogAnxietyMonitoring logAnxiety;
     private LogChallenge logChallenge;
@@ -48,9 +43,6 @@ public class LogPicker extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_picker);
 
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        hasContinue = mSharedPreferences.getBoolean(getString(R.string.saved_log), false);
-
         loadSpinners();
 
     }
@@ -60,6 +52,7 @@ public class LogPicker extends AppCompatActivity {
         modules = (Spinner) findViewById(R.id.modulePicker);
         action = (Spinner) findViewById(R.id.actionOptions);
 
+        // Every time a module gets clicked, load the appropiate logs corresponding to that log
         ArrayAdapter<CharSequence> modulesAdapter = ArrayAdapter.createFromResource(this, R.array.modules, android.R.layout.simple_spinner_item);
         modulesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         modules.setAdapter(modulesAdapter);
@@ -97,6 +90,7 @@ public class LogPicker extends AppCompatActivity {
         actionAdapter.add("New");
         actionAdapter.add("Review");
 
+        // Every time a log is clicked, check to see if it has a temp table associated with the log object
         logs.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -138,17 +132,19 @@ public class LogPicker extends AppCompatActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
+                //Auto generated stub
             }
         });
     }
+
+    // Start button listener
     public void startLog(View v){
         logSelection = logs.getSelectedItem().toString();
         actionSelection = action.getSelectedItem().toString();
         parseSelection(logSelection, actionSelection);
     }
 
-
+    // Send appropiate intent message over to Questionary
     private void parseSelection(String logSelected, String actionSelected) {
         switch(actionSelected){
             case "New":
@@ -170,7 +166,7 @@ public class LogPicker extends AppCompatActivity {
         }
     }
 
-    // Count is one over to include the submit screen in Quesitonary.java
+    // Count is one over to include the submit screen in Questionary.java
     private int getQuestionsInLog(String logSelected){
         switch(logSelected){
             case "Anxiety Monitoring Log": return 9;

@@ -47,6 +47,7 @@
             android:text="@string/cancel"
             android:backgroundTint="@color/warning_color"
             android:layout_weight="0.5"
+            android:onClick="dismissLog"
             />
 
         <Button
