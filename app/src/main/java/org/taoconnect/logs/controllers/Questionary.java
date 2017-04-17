@@ -40,7 +40,6 @@ import java.util.List;
 public class Questionary extends AppCompatActivity {
 
     private static int count;  //Number of questions
-    private static int viewsSaved = 0;
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
     private String log;
@@ -59,6 +58,7 @@ public class Questionary extends AppCompatActivity {
     private boolean isPreviousFilled;
     private boolean canSwipe = false;
     private boolean usingLevel0= false;
+
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -91,7 +91,6 @@ public class Questionary extends AppCompatActivity {
         }
 
     }
-
 
     /**
      * A placeholder fragment containing a simple view.
@@ -177,9 +176,7 @@ public class Questionary extends AppCompatActivity {
         Bundle extras = receivedIntent.getExtras();
         count = extras.getInt("Count");
         log = extras.getString("Log");
-        String action = extras.getString("Action");
-        if(action.equals("New"))
-            viewsSaved = 0;
+
         createLogClass(log);
 
         // Create the adapter that will return a fragment for each of the three
@@ -197,8 +194,10 @@ public class Questionary extends AppCompatActivity {
                 }
                 prevPos = itr;
                 itr = position;
-                if(!movingLeft)
+                if(!movingLeft) {
+                    Log.e("Event", "Wrote to table");
                     writeToTable(false);
+                }
 
                 if(prevPos>itr){
                     movingLeft = true;
@@ -217,6 +216,10 @@ public class Questionary extends AppCompatActivity {
             }
         });
 
+        String action = extras.getString("Action");
+        if(action.equals("Continue")){
+            goToLastView();
+        }
 
         itr=0;
     }
@@ -238,6 +241,7 @@ public class Questionary extends AppCompatActivity {
         error.startAnimation(a);
     }
 
+    // This methods stops the user from moving to the next one until the view is filled
     private boolean isFulfilled(int currentPos){
         View v = views.get(currentPos);
         int layout = v.getId();
@@ -374,9 +378,8 @@ public class Questionary extends AppCompatActivity {
         return canSwipe;
     }
 
+    // Saves user input onswipe to the correspondent object
     private void setParameters(int pos, String log){
-        if(viewsSaved <= count)
-            viewsSaved++;
         View v= null;
         if(movingLeft) {  // Get last item which is on the right
             v = views.get(pos + 1);
@@ -582,7 +585,6 @@ public class Questionary extends AppCompatActivity {
     }
 
     private void createLogClass(String log){
-        Log.e("Event", "Class created");
         switch (log){
             case "Anxiety Monitoring Log": logAnxiety = new LogAnxietyMonitoring(this);
                 layouts = logAnxiety.getResources();
@@ -613,37 +615,12 @@ public class Questionary extends AppCompatActivity {
         }
     }
 
-    public void displayClosingDialog(View v){
-        AlertDialog.Builder mBuilder = new AlertDialog.Builder(this);
-        mBuilder.setTitle("Are you sure you want to exit?");
-        mBuilder.setMessage("We will save your current progress so you can continue right from where you left off");
-        mBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
-                editor.putBoolean(getString(R.string.saved_log), true);
-                editor.apply();
-                goToLogPicker();
-            }
-        });
-        mBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        AlertDialog mDialog = mBuilder.create();
-        mDialog.show();
-    }
+    // If the action was continue, this method populates all the views the user already entered
+    // and opens the next view to be filled.
+    private void goToLastView(){
 
-    private void goToLogPicker(){  // Return to LogPicker activity
-        Intent close = new Intent(this, LogPicker.class);
-        close.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        views.clear();
-        startActivity(close);
-        finish();
     }
-
+    // This methods writes to temp table if boolean is false otherwise it writes to permanent table
     private void writeToTable(boolean isPermanent){
         switch (log) {
             case "Anxiety Monitoring Log":
@@ -688,10 +665,11 @@ public class Questionary extends AppCompatActivity {
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
                 editor.putBoolean(getString(R.string.saved_log), false);
                 editor.apply();
+                writeToTable(true);
                 goToLogPicker();
             }
         });
-        
+
         mBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -703,6 +681,42 @@ public class Questionary extends AppCompatActivity {
         writeToTable(true);
     }
 
+    public void displayClosingDialog(View v){
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(this);
+        mBuilder.setTitle("Are you sure you want to exit?");
+        mBuilder.setMessage("We will save your current progress so you can continue right from where you left off");
+        mBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+                editor.putBoolean(getString(R.string.saved_log), true);
+                editor.apply();
+                writeToTable(false);
+                goToLogPicker();
+            }
+        });
+        mBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        AlertDialog mDialog = mBuilder.create();
+        mDialog.show();
+    }
+
+    // Shuts down this activity and moves to LogPicker
+    private void goToLogPicker(){
+        Intent close = new Intent(this, LogPicker.class);
+        close.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        views.clear();
+        startActivity(close);
+        finish();
+    }
+
+    /** If the user press the back key it moves to the previous view. OnPageSelected will make the necessary
+     * changes whent his happens
+     */
     @Override
     public void onBackPressed(){
         if(mViewPager.getCurrentItem() != 0){

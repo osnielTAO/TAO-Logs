@@ -15,6 +15,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 
+import org.taoconnect.logs.models.LogAnxietyMonitoring;
+import org.taoconnect.logs.models.LogChallenge;
+import org.taoconnect.logs.models.LogExposure;
 import org.taoconnect.logs.models.LogRelaxation;
 import org.taoconnect.logs.tools.R;
 
@@ -24,22 +27,21 @@ import org.taoconnect.logs.databases.MySQLiteHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-
-// TODO: populate modules from database
-// TODO: populate logs from database
 // TODO: add accesibility labels
 
 public class LogPicker extends AppCompatActivity {
-
     private Button startbutton;
     private SharedPreferences mSharedPreferences;
     private final String DBName = "tempLogs.db";
     private SQLiteDatabase tempDB;
     private boolean hasContinue;
-    private static MySQLiteHelper mHelper;
     private Context context = this;
     private String actionSelection, logSelection, moduleSelection;
     private Spinner logs, modules, action;
+    private LogAnxietyMonitoring logAnxiety;
+    private LogChallenge logChallenge;
+    private LogExposure logExposure;
+    private LogRelaxation logRelaxation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,11 +50,16 @@ public class LogPicker extends AppCompatActivity {
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         hasContinue = mSharedPreferences.getBoolean(getString(R.string.saved_log), false);
-        mHelper = new MySQLiteHelper(getApplicationContext());
 
+        loadSpinners();
+
+    }
+
+    private void loadSpinners(){
         logs = (Spinner) findViewById(R.id.logPicker);
-
         modules = (Spinner) findViewById(R.id.modulePicker);
+        action = (Spinner) findViewById(R.id.actionOptions);
+
         ArrayAdapter<CharSequence> modulesAdapter = ArrayAdapter.createFromResource(this, R.array.modules, android.R.layout.simple_spinner_item);
         modulesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         modules.setAdapter(modulesAdapter);
@@ -84,48 +91,63 @@ public class LogPicker extends AppCompatActivity {
             }
         });
 
-        action = (Spinner) findViewById(R.id.actionOptions);
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, android.R.id.text1);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        action.setAdapter(spinnerAdapter);
-        spinnerAdapter.add("New");
-        spinnerAdapter.add("Review");
-        if (hasContinue) spinnerAdapter.add("Continue");
+        final ArrayAdapter<String> actionAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, android.R.id.text1);
+        actionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        action.setAdapter(actionAdapter);
+        actionAdapter.add("New");
+        actionAdapter.add("Review");
 
+        logs.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                boolean hasContinue = false;
+                switch (parent.getSelectedItem().toString()){
+                    case "Anxiety Monitoring Log": logAnxiety = new LogAnxietyMonitoring(context);
+                        hasContinue = logAnxiety.hasTempTable();
+                        break;
+                    case "Relaxation Log":
+                        logRelaxation = new LogRelaxation(context);
+                        hasContinue = logRelaxation.hasTempTable();
+                        break;
+                    case "Challenge Log": logChallenge = new LogChallenge(context);
+                        hasContinue = logChallenge.hasTempTable();
+                        break;
+                    case "Exposure Log": logExposure = new LogExposure(context);
+                        hasContinue = logExposure.hasTempTable();
+                        break;
+                    case "Feeling Log":
+                    case "Activation Plan":
+                    case "Rumination Record":
+                    case "Letting Go Exercise Log":
+                    case "Mindfulness Log":
+                    case "Anxiety Logs":
+                    case "Behavioral Activation":
+                    case "Acceptance and Commitment Therapy":
+                    case "Cognitive Behavioral":
+                        break;
+                }
+                if(hasContinue){
+                    Log.e("Event", "Continue added");
+                    actionAdapter.add("Continue");
+                }
+                else{
+                    actionAdapter.remove("Continue");
+                }
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
-
     public void startLog(View v){
         logSelection = logs.getSelectedItem().toString();
         actionSelection = action.getSelectedItem().toString();
         parseSelection(logSelection, actionSelection);
-     
-
     }
 
-    public static void readDatabase(){
-        SQLiteDatabase db = mHelper.getReadableDatabase();
-        Cursor firstSet = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_RELAX_LOG, null);
-        List<Cursor> myCursors = new ArrayList<Cursor>();
-        myCursors.add(firstSet);
-
-       for(Cursor section : myCursors) {
-           if(section.getCount() > 0) {
-               String[] columns = section.getColumnNames();
-               section.moveToFirst();
-               List<String> values = new ArrayList<String>();
-               do{
-                   if(section.getString(section.getColumnIndex(columns[1])) != null)
-                    Log.e("Values", section.getString(section.getColumnIndex(columns[1])));
-                   if(section.getInt(section.getColumnIndex(columns[2])) != 0)
-                    Log.e("Values", String.valueOf(section.getInt(section.getColumnIndex(columns[2]))));
-                   if(section.getString(section.getColumnIndex(columns[3])) != null)
-                    Log.e("Values", section.getString(section.getColumnIndex(columns[3])));
-               } while(section.moveToNext());
-           }
-           section.close();
-        }
-        db.close();
-    }
 
     private void parseSelection(String logSelected, String actionSelected) {
         switch(actionSelected){
@@ -138,7 +160,13 @@ public class LogPicker extends AppCompatActivity {
                 break;
             case "Review":  //TODO: send intent to review activity
                 break;
-            case "Continue":  //TODO: load local copy and continue
+            case "Continue":
+                Intent cont = new Intent(this, Questionary.class);
+                cont.putExtra("Log", logSelected);
+                cont.putExtra("Count", getQuestionsInLog(logSelected));
+                cont.putExtra("Action", "Continue");
+                startActivity(cont);
+                break;
         }
     }
 

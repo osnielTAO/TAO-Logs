@@ -3,6 +3,7 @@ package org.taoconnect.logs.models;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import org.taoconnect.logs.databases.InitialSchema;
@@ -42,19 +43,6 @@ public class LogAnxietyMonitoring implements LogInterface {
             R.layout.short_response_questionary,
             R.layout.short_response_questionary};
 
-    private final String INIT_TEMP = "CREATE TABLE IF NOT EXISTS " + InitialSchema.TABLE_NAME_ANX_MON_LOG + "Temp "
-            + "( "  + InitialSchema._ID + " INTEGER PRIMARY KEY, "
-            + InitialSchema.DATE_SELECTED  +  " TEXT,"
-            + InitialSchema.TIME_SELECTED + " TEXT,"
-            + InitialSchema.ANXIETY_LEVEL + " INTEGER,"
-            + InitialSchema.ANXIETY_EVENT + " TEXT,"
-            + InitialSchema.SPECIFIC_WORRY + " TEXT,"
-            + InitialSchema.TRIGGERS + " TEXT,"
-            + InitialSchema.ACTION_TAKEN + " TEXT,"
-            + InitialSchema.OUTCOME + " TEXT)";
-
-    private final String DROP_TEMP_TABLE = "DROP TABLE IF EXISTS " + InitialSchema.TABLE_NAME_ANX_MON_LOG + "Temp ";
-
     public int[] getResources() {
         return resources;
     }
@@ -84,7 +72,6 @@ public class LogAnxietyMonitoring implements LogInterface {
         MySQLiteHelper mHelper = new MySQLiteHelper(context);
         SQLiteDatabase db = mHelper.getWritableDatabase();
 
-        db.execSQL(INIT_TEMP);
         ContentValues values = new ContentValues();
         values.put(InitialSchema._ID, rowId);  // Use the same rowId so it can get updated
         values.put(InitialSchema.DATE_SELECTED, getDateSelected());
@@ -116,10 +103,19 @@ public class LogAnxietyMonitoring implements LogInterface {
         values.put(InitialSchema.OUTCOME, getOutcome());
 
         db.insert(InitialSchema.TABLE_NAME_ANX_MON_LOG,null,values);
-        db.execSQL(DROP_TEMP_TABLE);
         db.close();
     }
 
+    @Override
+    public boolean hasTempTable(){
+        MySQLiteHelper mHelper = new MySQLiteHelper(context);
+        SQLiteDatabase db = mHelper.getWritableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_ANX_MON_LOG + "Temp", null);
+        int rows = cursor.getCount();
+
+        return (rows != 0); // Returns false if table is empty, true otherwise
+    }
     public String getDateSelected() {
         return dateSelected;
     }

@@ -11,4 +11,5 @@ interface LogInterface {
     String[] getQuestions() ;
     void insertToTempDB();
     void insertToPermanentDB();
+    boolean hasTempTable();
 }
