@@ -40,6 +40,7 @@ import java.util.List;
 public class Questionary extends AppCompatActivity {
 
     private static int count;  //Number of questions
+    private static int viewsSaved = 0;
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
     private String log;
@@ -55,7 +56,6 @@ public class Questionary extends AppCompatActivity {
     private static boolean movingLeft = false;
     private boolean dateClicked = false;
     private boolean timeClicked = false;
-    private boolean barClicked = false;
     private boolean isPreviousFilled;
     private boolean canSwipe = false;
     private boolean usingLevel0= false;
@@ -177,6 +177,9 @@ public class Questionary extends AppCompatActivity {
         Bundle extras = receivedIntent.getExtras();
         count = extras.getInt("Count");
         log = extras.getString("Log");
+        String action = extras.getString("Action");
+        if(action.equals("New"))
+            viewsSaved = 0;
         createLogClass(log);
 
         // Create the adapter that will return a fragment for each of the three
@@ -194,12 +197,17 @@ public class Questionary extends AppCompatActivity {
                 }
                 prevPos = itr;
                 itr = position;
+                if(!movingLeft)
+                    writeToTable(false);
+
                 if(prevPos>itr){
                     movingLeft = true;
                 }
                 else{
                     movingLeft = false;
                 }
+
+
                 if(!isPreviousFilled){
                     mViewPager.setCurrentItem(itr-1);
                 }
@@ -216,6 +224,7 @@ public class Questionary extends AppCompatActivity {
     public void setDateAsClicked(View v){
         dateClicked = true;
     }
+
     public void setTimeAsClicked(View v){
         timeClicked = true;
     }
@@ -228,7 +237,6 @@ public class Questionary extends AppCompatActivity {
         error.clearAnimation();
         error.startAnimation(a);
     }
-
 
     private boolean isFulfilled(int currentPos){
         View v = views.get(currentPos);
@@ -367,6 +375,8 @@ public class Questionary extends AppCompatActivity {
     }
 
     private void setParameters(int pos, String log){
+        if(viewsSaved <= count)
+            viewsSaved++;
         View v= null;
         if(movingLeft) {  // Get last item which is on the right
             v = views.get(pos + 1);
@@ -626,22 +636,35 @@ public class Questionary extends AppCompatActivity {
         mDialog.show();
     }
 
-    private void goToLogPicker(){
+    private void goToLogPicker(){  // Return to LogPicker activity
         Intent close = new Intent(this, LogPicker.class);
-        boolean canGoPermanentDB = views.size() == count;
-        Log.e("Event", "Wrote to DB");
+        close.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        views.clear();
+        startActivity(close);
+        finish();
+    }
+
+    private void writeToTable(boolean isPermanent){
         switch (log) {
             case "Anxiety Monitoring Log":
-                logAnxiety.insertToTempDB(canGoPermanentDB);
+                if(!isPermanent)
+                    logAnxiety.insertToTempDB();
+                else logAnxiety.insertToPermanentDB();
                 break;
             case "Relaxation Log":
-                logRelaxation.insertToTempDB(canGoPermanentDB);
+                if(!isPermanent)
+                    logRelaxation.insertToTempDB();
+                else logRelaxation.insertToPermanentDB();
                 break;
             case "Challenge Log":
-                logChallenge.insertToTempDB(canGoPermanentDB);
+                if(!isPermanent)
+                    logChallenge.insertToTempDB();
+                else logChallenge.insertToPermanentDB();
                 break;
             case "Exposure Log":
-                logExposure.insertToTempDB(canGoPermanentDB);
+                if(!isPermanent)
+                    logExposure.insertToTempDB();
+                else logExposure.insertToPermanentDB();
                 break;
             case "Feeling Log":
             case "Activation Plan":
@@ -653,21 +676,39 @@ public class Questionary extends AppCompatActivity {
             case "Acceptance and Commitment Therapy":
             case "Cognitive Behavioral":
                 break;
-
         }
-        close.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        views.clear();
-        startActivity(close);
-        finish();
     }
 
+    public void submitLog(View v){
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(this);
+        mBuilder.setTitle("Are you ready to submit?");
+        mBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+                editor.putBoolean(getString(R.string.saved_log), false);
+                editor.apply();
+                goToLogPicker();
+            }
+        });
+        
+        mBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        AlertDialog mDialog = mBuilder.create();
+        mDialog.show();
+        writeToTable(true);
+    }
 
     @Override
     public void onBackPressed(){
         if(mViewPager.getCurrentItem() != 0){
             mViewPager.setCurrentItem(itr-1);
         }
-        else{
+        else{  // User is at the very first view
             View placeholder= new View(this);  //This is just to fulfill method requirements
             displayClosingDialog(placeholder);
         }

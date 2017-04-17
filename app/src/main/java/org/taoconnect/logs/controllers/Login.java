@@ -29,10 +29,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkError;
+import com.android.volley.NoConnectionError;
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import org.taoconnect.logs.tools.ExtHttpClientStack;
@@ -212,6 +219,23 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
             @Override
             public void onErrorResponse(VolleyError error){
                 Toast.makeText(context,"That didn't work", Toast.LENGTH_SHORT).show();
+                String message = null;
+                if (error instanceof NetworkError) {
+                    message = "Network error";
+                } else if (error instanceof ServerError) {
+                    message = "The server could not be found. Please try again after some time!!";
+                } else if (error instanceof AuthFailureError) {
+                    message = "auth fail";
+                } else if (error instanceof ParseError) {
+                    message = "Parsing error! Please try again after some time!!";
+                } else if (error instanceof NoConnectionError) {
+                    message = "NoConnection";
+                } else if (error instanceof TimeoutError) {
+                    message = "Connection TimeOut! Please check your internet connection.";
+                }
+                Log.e("Error", message);
+
+
             }
         });
 

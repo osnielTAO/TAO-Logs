@@ -14,6 +14,7 @@ import org.taoconnect.logs.tools.R;
 
 public class LogExposure implements LogInterface {
     private Context context;
+    private long rowId = 1;
     public String tableName = InitialSchema.TABLE_NAME_EXPOSURE_LOG;
     private String worrySituation;
     private String worstOutcome;
@@ -43,7 +44,8 @@ public class LogExposure implements LogInterface {
     };
 
     private final String INIT_TEMP = "CREATE TABLE IF NOT EXISTS " + InitialSchema.TABLE_NAME_EXPOSURE_LOG + "Temp "
-            + "( " + InitialSchema.WORRY_SITUATION +  " TEXT,"
+            + "( " + InitialSchema._ID + " INTEGER PRIMARY KEY, "
+            + InitialSchema.WORRY_SITUATION +  " TEXT,"
             + InitialSchema.WORST_OUTCOME + " TEXT,"
             + InitialSchema.SUDS_PRIOR + " INTEGER,"
             + InitialSchema.SUDS_MAX + " INTEGER,"
@@ -67,27 +69,43 @@ public class LogExposure implements LogInterface {
     }
 
     @Override
-    public void insertToTempDB(boolean isPermanentDb) {
+    public void insertToTempDB() {
         MySQLiteHelper mHelper = new MySQLiteHelper(context);
         SQLiteDatabase db = mHelper.getWritableDatabase();
-        if(!isPermanentDb) {
-            db.execSQL(INIT_TEMP);
-            ContentValues values = new ContentValues();
 
-            values.put(InitialSchema.WORRY_SITUATION, getWorrySituation());
-            values.put(InitialSchema.WORST_OUTCOME, getWorstOutcome());
-            values.put(InitialSchema.SUDS_PRIOR, getSUDSPrior());
-            values.put(InitialSchema.SUDS_MAX, getSUDSMax());
-            values.put(InitialSchema.SUDS_AFTER, getSUDSAfter());
-            values.put(InitialSchema.SUDS_END, getSUDSEnd());
-            values.put(InitialSchema.SYMPTONS_DURING, getSymptons());
-            values.put(InitialSchema.ALTERNATIVE_OUTCOMES, getAlternative());
-            long newRow = db.insert(InitialSchema.TABLE_NAME_EXPOSURE_LOG + "Temp ", null, values);
-        }
-        else{
-            db.execSQL(COPY_TABLE_TO_PERMANENT);
-            db.execSQL(DROP_TEMP_TABLE);
-        }
+        db.execSQL(INIT_TEMP);
+        ContentValues values = new ContentValues();
+        values.put(InitialSchema._ID, rowId);  // Use the same rowId so it can get updated
+        values.put(InitialSchema.WORRY_SITUATION, getWorrySituation());
+        values.put(InitialSchema.WORST_OUTCOME, getWorstOutcome());
+        values.put(InitialSchema.SUDS_PRIOR, getSUDSPrior());
+        values.put(InitialSchema.SUDS_MAX, getSUDSMax());
+        values.put(InitialSchema.SUDS_AFTER, getSUDSAfter());
+        values.put(InitialSchema.SUDS_END, getSUDSEnd());
+        values.put(InitialSchema.SYMPTONS_DURING, getSymptons());
+        values.put(InitialSchema.ALTERNATIVE_OUTCOMES, getAlternative());
+        rowId = db.insert(InitialSchema.TABLE_NAME_EXPOSURE_LOG + "Temp ", null, values);
+
+        db.close();
+    }
+
+    @Override
+    public void insertToPermanentDB(){
+        MySQLiteHelper mHelper = new MySQLiteHelper(context);
+        SQLiteDatabase db = mHelper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(InitialSchema.WORRY_SITUATION, getWorrySituation());
+        values.put(InitialSchema.WORST_OUTCOME, getWorstOutcome());
+        values.put(InitialSchema.SUDS_PRIOR, getSUDSPrior());
+        values.put(InitialSchema.SUDS_MAX, getSUDSMax());
+        values.put(InitialSchema.SUDS_AFTER, getSUDSAfter());
+        values.put(InitialSchema.SUDS_END, getSUDSEnd());
+        values.put(InitialSchema.SYMPTONS_DURING, getSymptons());
+        values.put(InitialSchema.ALTERNATIVE_OUTCOMES, getAlternative());
+
+        db.insert(InitialSchema.TABLE_NAME_EXPOSURE_LOG,null,values);
+        db.execSQL(DROP_TEMP_TABLE);
         db.close();
     }
 

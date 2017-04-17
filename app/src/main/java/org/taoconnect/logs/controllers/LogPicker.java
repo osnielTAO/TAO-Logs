@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 
+import org.taoconnect.logs.models.LogRelaxation;
 import org.taoconnect.logs.tools.R;
 
 import org.taoconnect.logs.databases.InitialSchema;
@@ -35,7 +36,7 @@ public class LogPicker extends AppCompatActivity {
     private final String DBName = "tempLogs.db";
     private SQLiteDatabase tempDB;
     private boolean hasContinue;
-    private MySQLiteHelper mHelper;
+    private static MySQLiteHelper mHelper;
     private Context context = this;
     private String actionSelection, logSelection, moduleSelection;
     private Spinner logs, modules, action;
@@ -91,7 +92,6 @@ public class LogPicker extends AppCompatActivity {
         spinnerAdapter.add("Review");
         if (hasContinue) spinnerAdapter.add("Continue");
 
-        readDatabase();
     }
 
     public void startLog(View v){
@@ -102,17 +102,11 @@ public class LogPicker extends AppCompatActivity {
 
     }
 
-    private void readDatabase(){
+    public static void readDatabase(){
         SQLiteDatabase db = mHelper.getReadableDatabase();
         Cursor firstSet = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_RELAX_LOG, null);
-        //Cursor secondSet = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_ANX_MON_LOG, null);
-        //Cursor thirdSet = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_EXPOSURE_LOG, null);
-       // Cursor fourthSet = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_CHALLENGE_LOG, null);
         List<Cursor> myCursors = new ArrayList<Cursor>();
         myCursors.add(firstSet);
-        //myCursors.add(secondSet);
-       // myCursors.add(thirdSet);
-       // myCursors.add(fourthSet);
 
        for(Cursor section : myCursors) {
            if(section.getCount() > 0) {
@@ -120,10 +114,13 @@ public class LogPicker extends AppCompatActivity {
                section.moveToFirst();
                List<String> values = new ArrayList<String>();
                do{
-                   Log.e("Values", section.getString(section.getColumnIndex(columns[0])));
-                   Log.e("Values", String.valueOf(section.getInt(section.getColumnIndex(columns[1]))));
-                   Log.e("Values", section.getString(section.getColumnIndex(columns[2])));
-               }while(section.moveToNext());
+                   if(section.getString(section.getColumnIndex(columns[1])) != null)
+                    Log.e("Values", section.getString(section.getColumnIndex(columns[1])));
+                   if(section.getInt(section.getColumnIndex(columns[2])) != 0)
+                    Log.e("Values", String.valueOf(section.getInt(section.getColumnIndex(columns[2]))));
+                   if(section.getString(section.getColumnIndex(columns[3])) != null)
+                    Log.e("Values", section.getString(section.getColumnIndex(columns[3])));
+               } while(section.moveToNext());
            }
            section.close();
         }
@@ -136,6 +133,7 @@ public class LogPicker extends AppCompatActivity {
                 Intent start = new Intent(this, Questionary.class);
                 start.putExtra("Log", logSelected);
                 start.putExtra("Count", getQuestionsInLog(logSelected));
+                start.putExtra("Action", "New");
                 startActivity(start);
                 break;
             case "Review":  //TODO: send intent to review activity

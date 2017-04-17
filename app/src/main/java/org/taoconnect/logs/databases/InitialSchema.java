@@ -19,7 +19,8 @@ public class InitialSchema implements BaseColumns {
     public static final String ACTION_TAKEN = "actionTaken";
     public static final String OUTCOME = "outcome";
     public static final String CREATE_ANX_MON_LOG  = "CREATE TABLE " + InitialSchema.TABLE_NAME_ANX_MON_LOG
-                                                    + "( " + InitialSchema.DATE_SELECTED  +  " TEXT,"
+                                                    + "( " + InitialSchema._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                                                    + InitialSchema.DATE_SELECTED  +  " TEXT,"
                                                     + InitialSchema.TIME_SELECTED + " TEXT,"
                                                     + InitialSchema.ANXIETY_LEVEL + " INTEGER,"
                                                     + InitialSchema.ANXIETY_EVENT + " TEXT,"
@@ -33,7 +34,8 @@ public class InitialSchema implements BaseColumns {
     /** Reuse ANXIETY_LEVEL **/
     public static final String RELAXATION_EXERCISE = "relaxationExercise";
     public static final String CREATE_RELAX_LOG = "CREATE TABLE " + InitialSchema.TABLE_NAME_RELAX_LOG
-                                                    + "( " + InitialSchema.THOUGHTS_BEFORE +  " TEXT,"
+                                                    + "( "  + InitialSchema._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                                                    + InitialSchema.THOUGHTS_BEFORE +  " TEXT,"
                                                     + InitialSchema.ANXIETY_LEVEL + " INTEGER,"
                                                     + InitialSchema.RELAXATION_EXERCISE + " TEXT)";
 
@@ -46,7 +48,8 @@ public class InitialSchema implements BaseColumns {
     public static final String CORE_BELIEVES = "unhealthyCoreBeliefs";
     public static final String ALTERNATE_VIEW = "alternateView";
     public static final String CREATE_CHALLENGE_LOG  = "CREATE TABLE " + InitialSchema.TABLE_NAME_CHALLENGE_LOG
-                                                    + "( " + InitialSchema.DATE_SELECTED  +  " TEXT,"
+                                                    + "( " + InitialSchema._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                                                    + InitialSchema.DATE_SELECTED  +  " TEXT,"
                                                     + InitialSchema.TIME_SELECTED + " TEXT,"
                                                     + InitialSchema.ANXIETY_LEVEL + " INTEGER,"
                                                     + InitialSchema.ANXIETY_EVENT + " TEXT,"
@@ -69,7 +72,8 @@ public class InitialSchema implements BaseColumns {
     public static final String SYMPTONS_DURING = "symptonsExercise";
     public static final String ALTERNATIVE_OUTCOMES = "alernativeOutcomes";
     public static final String CREATE_EXPOSURE_LOG = "CREATE TABLE " + InitialSchema.TABLE_NAME_EXPOSURE_LOG
-                                                    + "( " + InitialSchema.WORRY_SITUATION +  " TEXT,"
+                                                    + "( " + InitialSchema._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                                                    + InitialSchema.WORRY_SITUATION +  " TEXT,"
                                                     + InitialSchema.WORST_OUTCOME + " TEXT,"
                                                     + InitialSchema.SUDS_PRIOR + " INTEGER,"
                                                     + InitialSchema.SUDS_MAX + " INTEGER,"

@@ -14,6 +14,7 @@ import org.taoconnect.logs.tools.R;
 
 public class LogChallenge implements LogInterface {
     private Context context;
+    private long rowId = 1;
     private final String tableName = InitialSchema.TABLE_NAME_CHALLENGE_LOG;
     private String dateSelected;
     private String timeSelected;
@@ -40,7 +41,8 @@ public class LogChallenge implements LogInterface {
             "Unhealthy Core Beliefs",
             "Alternate way of viewing the situation"};
     private final String INIT_TEMP = "CREATE TABLE IF NOT EXISTS" + InitialSchema.TABLE_NAME_CHALLENGE_LOG + "Temp "
-            + "( " + InitialSchema.DATE_SELECTED  +  " TEXT,"
+            + "( " + InitialSchema._ID + " INTEGER PRIMARY KEY, "
+            + InitialSchema.DATE_SELECTED  +  " TEXT,"
             + InitialSchema.TIME_SELECTED + " TEXT,"
             + InitialSchema.ANXIETY_LEVEL + " INTEGER,"
             + InitialSchema.ANXIETY_EVENT + " TEXT,"
@@ -52,8 +54,6 @@ public class LogChallenge implements LogInterface {
             + InitialSchema.CHALLENGES + " TEXT,"
             + InitialSchema.CORE_BELIEVES + " TEXT,"
             + InitialSchema.ALTERNATE_VIEW + " TEXT)";
-
-    private final String COPY_TABLE_TO_PERMANENT = "INSERT INTO " + InitialSchema.TABLE_NAME_CHALLENGE_LOG + " SELECT * FROM " + InitialSchema.TABLE_NAME_CHALLENGE_LOG + "Temp ";
 
     private final String DROP_TEMP_TABLE = "DROP TABLE IF EXISTS " + InitialSchema.TABLE_NAME_CHALLENGE_LOG + "Temp ";
 
@@ -81,33 +81,54 @@ public class LogChallenge implements LogInterface {
     public LogChallenge(Context context){
         this.context = context;
     }
+
     @Override
-    public void insertToTempDB(boolean isPermanentDb) {
+    public void insertToTempDB() {
         MySQLiteHelper mHelper = new MySQLiteHelper(context);
         SQLiteDatabase db = mHelper.getWritableDatabase();
-        if(!isPermanentDb) {
-            db.execSQL(INIT_TEMP);
-            ContentValues values = new ContentValues();
 
-            values.put(InitialSchema.DATE_SELECTED, getDateSelected());
-            values.put(InitialSchema.TIME_SELECTED, getTimeSelected());
-            values.put(InitialSchema.ANXIETY_LEVEL, getAnxietyLevel());
-            values.put(InitialSchema.ANXIETY_EVENT, getAnxietyEvent());
-            values.put(InitialSchema.SPECIFIC_WORRY, getSpecificWorry());
-            values.put(InitialSchema.TRIGGERS, getTriggers());
-            values.put(InitialSchema.ACTION_TAKEN, getActionTaken());
-            values.put(InitialSchema.OUTCOME, getOutcome());
-            values.put(InitialSchema.UNH_ASSUMPTIONS, getAssumptions());
-            values.put(InitialSchema.CHALLENGES, getChallenges());
-            values.put(InitialSchema.CORE_BELIEVES, getCoreBelieves());
-            values.put(InitialSchema.ALTERNATE_VIEW, getAlternateView());
+        db.execSQL(INIT_TEMP);
+        ContentValues values = new ContentValues();
+        values.put(InitialSchema._ID, rowId);  // Use the same rowId so it can get updated
+        values.put(InitialSchema.DATE_SELECTED, getDateSelected());
+        values.put(InitialSchema.TIME_SELECTED, getTimeSelected());
+        values.put(InitialSchema.ANXIETY_LEVEL, getAnxietyLevel());
+        values.put(InitialSchema.ANXIETY_EVENT, getAnxietyEvent());
+        values.put(InitialSchema.SPECIFIC_WORRY, getSpecificWorry());
+        values.put(InitialSchema.TRIGGERS, getTriggers());
+        values.put(InitialSchema.ACTION_TAKEN, getActionTaken());
+        values.put(InitialSchema.OUTCOME, getOutcome());
+        values.put(InitialSchema.UNH_ASSUMPTIONS, getAssumptions());
+        values.put(InitialSchema.CHALLENGES, getChallenges());
+        values.put(InitialSchema.CORE_BELIEVES, getCoreBelieves());
+        values.put(InitialSchema.ALTERNATE_VIEW, getAlternateView());
 
-            long newRow = db.insert(InitialSchema.TABLE_NAME_CHALLENGE_LOG + "Temp ", null, values);
-        }
-        else{
-            db.execSQL(COPY_TABLE_TO_PERMANENT);
-            db.execSQL(DROP_TEMP_TABLE);
-        }
+        rowId = db.insert(InitialSchema.TABLE_NAME_CHALLENGE_LOG + "Temp ", null, values);
+
+        db.close();
+    }
+
+    @Override
+    public void insertToPermanentDB(){
+        MySQLiteHelper mHelper = new MySQLiteHelper(context);
+        SQLiteDatabase db = mHelper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(InitialSchema.DATE_SELECTED, getDateSelected());
+        values.put(InitialSchema.TIME_SELECTED, getTimeSelected());
+        values.put(InitialSchema.ANXIETY_LEVEL, getAnxietyLevel());
+        values.put(InitialSchema.ANXIETY_EVENT, getAnxietyEvent());
+        values.put(InitialSchema.SPECIFIC_WORRY, getSpecificWorry());
+        values.put(InitialSchema.TRIGGERS, getTriggers());
+        values.put(InitialSchema.ACTION_TAKEN, getActionTaken());
+        values.put(InitialSchema.OUTCOME, getOutcome());
+        values.put(InitialSchema.UNH_ASSUMPTIONS, getAssumptions());
+        values.put(InitialSchema.CHALLENGES, getChallenges());
+        values.put(InitialSchema.CORE_BELIEVES, getCoreBelieves());
+        values.put(InitialSchema.ALTERNATE_VIEW, getAlternateView());
+
+        db.insert(InitialSchema.TABLE_NAME_CHALLENGE_LOG,null,values);
+        db.execSQL(DROP_TEMP_TABLE);
         db.close();
     }
 

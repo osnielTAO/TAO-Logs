@@ -15,6 +15,7 @@ import org.taoconnect.logs.tools.R;
 
 public class LogAnxietyMonitoring implements LogInterface {
     private String tableName = InitialSchema.TABLE_NAME_ANX_MON_LOG;
+    private long rowId = 1;
     private String dateSelected;
     private String timeSelected;
     private int anxietyLevel;
@@ -42,7 +43,8 @@ public class LogAnxietyMonitoring implements LogInterface {
             R.layout.short_response_questionary};
 
     private final String INIT_TEMP = "CREATE TABLE IF NOT EXISTS " + InitialSchema.TABLE_NAME_ANX_MON_LOG + "Temp "
-            + "( " + InitialSchema.DATE_SELECTED  +  " TEXT,"
+            + "( "  + InitialSchema._ID + " INTEGER PRIMARY KEY, "
+            + InitialSchema.DATE_SELECTED  +  " TEXT,"
             + InitialSchema.TIME_SELECTED + " TEXT,"
             + InitialSchema.ANXIETY_LEVEL + " INTEGER,"
             + InitialSchema.ANXIETY_EVENT + " TEXT,"
@@ -50,8 +52,6 @@ public class LogAnxietyMonitoring implements LogInterface {
             + InitialSchema.TRIGGERS + " TEXT,"
             + InitialSchema.ACTION_TAKEN + " TEXT,"
             + InitialSchema.OUTCOME + " TEXT)";
-
-    private final String COPY_TABLE_TO_PERMANENT = "INSERT INTO " + InitialSchema.TABLE_NAME_ANX_MON_LOG + " SELECT * FROM " + InitialSchema.TABLE_NAME_ANX_MON_LOG + "Temp ";
 
     private final String DROP_TEMP_TABLE = "DROP TABLE IF EXISTS " + InitialSchema.TABLE_NAME_ANX_MON_LOG + "Temp ";
 
@@ -80,28 +80,43 @@ public class LogAnxietyMonitoring implements LogInterface {
     }
 
     @Override
-    public void insertToTempDB(boolean isPermanentDb) {
+    public void insertToTempDB() {
         MySQLiteHelper mHelper = new MySQLiteHelper(context);
         SQLiteDatabase db = mHelper.getWritableDatabase();
-        if(!isPermanentDb) {
-            db.execSQL(INIT_TEMP);
-            ContentValues values = new ContentValues();
 
-            values.put(InitialSchema.DATE_SELECTED, getDateSelected());
-            values.put(InitialSchema.TIME_SELECTED, getTimeSelected());
-            values.put(InitialSchema.ANXIETY_LEVEL, getAnxietyLevel());
-            values.put(InitialSchema.ANXIETY_EVENT, getAnxietyEvent());
-            values.put(InitialSchema.SPECIFIC_WORRY, getSpecificWorry());
-            values.put(InitialSchema.TRIGGERS, getTriggers());
-            values.put(InitialSchema.ACTION_TAKEN, getActionTaken());
-            values.put(InitialSchema.OUTCOME, getOutcome());
+        db.execSQL(INIT_TEMP);
+        ContentValues values = new ContentValues();
+        values.put(InitialSchema._ID, rowId);  // Use the same rowId so it can get updated
+        values.put(InitialSchema.DATE_SELECTED, getDateSelected());
+        values.put(InitialSchema.TIME_SELECTED, getTimeSelected());
+        values.put(InitialSchema.ANXIETY_LEVEL, getAnxietyLevel());
+        values.put(InitialSchema.ANXIETY_EVENT, getAnxietyEvent());
+        values.put(InitialSchema.SPECIFIC_WORRY, getSpecificWorry());
+        values.put(InitialSchema.TRIGGERS, getTriggers());
+        values.put(InitialSchema.ACTION_TAKEN, getActionTaken());
+        values.put(InitialSchema.OUTCOME, getOutcome());
 
-            long newRow = db.insert(InitialSchema.TABLE_NAME_ANX_MON_LOG + "Temp ", null, values);
-        }
-        else{
-            db.execSQL(COPY_TABLE_TO_PERMANENT);
-            db.execSQL(DROP_TEMP_TABLE);
-        }
+        rowId = db.replace(InitialSchema.TABLE_NAME_ANX_MON_LOG + "Temp ", null, values);
+        db.close();
+    }
+
+    @Override
+    public void insertToPermanentDB(){
+        MySQLiteHelper mHelper = new MySQLiteHelper(context);
+        SQLiteDatabase db = mHelper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(InitialSchema.DATE_SELECTED, getDateSelected());
+        values.put(InitialSchema.TIME_SELECTED, getTimeSelected());
+        values.put(InitialSchema.ANXIETY_LEVEL, getAnxietyLevel());
+        values.put(InitialSchema.ANXIETY_EVENT, getAnxietyEvent());
+        values.put(InitialSchema.SPECIFIC_WORRY, getSpecificWorry());
+        values.put(InitialSchema.TRIGGERS, getTriggers());
+        values.put(InitialSchema.ACTION_TAKEN, getActionTaken());
+        values.put(InitialSchema.OUTCOME, getOutcome());
+
+        db.insert(InitialSchema.TABLE_NAME_ANX_MON_LOG,null,values);
+        db.execSQL(DROP_TEMP_TABLE);
         db.close();
     }
 
