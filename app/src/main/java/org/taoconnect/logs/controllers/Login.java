@@ -64,6 +64,22 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
 
+/** Class: Login
+ *  This class is the activity that launches right after the splash screen and authenticates the user.
+ *  It reads a key and enrypts it using a cypher to authenticate the user fingerprint. It is required by the FingerprintManager
+ *  to happen this way.
+ *  First it checks that the user has all requirements for fingerprint reader: hardware, permissions and existing fingerprints.
+ *  If the user has not registered fingerprints it shows a dialog asking to go to Settings and register them or activate
+ *  the keyguard Manager.
+ *  If all requirements are met, then the FAB button is showed. If the user checked to always use fingerprint authenticated
+ *  in the fingerprint dialog box, then the dialog box opens instantly onlogin.
+ *  If this is the user first login, then it will not allow for fingerprint recognition even if the requirements are met.
+ *  If the user clicks on login then it sends an authentication request through http using volley to the remote server.
+ *  If authentication fails, it displays an error message, otherwise it initializes LogPicker.
+ *  If the user logins this way, and there is a fingerprint reader available (requirements are met) and the user has never
+ *  tried fingerprint login before, then it displays a dialog message asking the user to use fingerprint in the future.
+ *  Regardless of user selection LogPicker will start.
+ */
 public class Login extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
     public final int REQUEST_CODE = 0x1;

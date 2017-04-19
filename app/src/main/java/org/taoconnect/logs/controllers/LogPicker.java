@@ -28,7 +28,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 // TODO: add accesibility labels
-
+/** Class: LogPicker
+ *  This class depends on the log models (e.g LogAnxietyMonitoring, LogChallenge...) and the local databases.
+ *  It displays three spinners: one for the module, one for the logs, one for the action
+ *  After a module gets selected, the right logs for that module get loaded
+ *  If the log has a temporal table with more than one row then the continue option will be displayed in the action
+ *  spinner.
+ *  Once all spinners have been selected it sends an intent to questionary with the amount of questions in the log,
+ *  the selected log and the selected action for that log.
+ *  Actions can be review, continue and new.
+ */
 public class LogPicker extends AppCompatActivity {
     private Context context = this;
     private String actionSelection, logSelection;

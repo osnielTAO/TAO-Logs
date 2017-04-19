@@ -22,6 +22,12 @@ import org.taoconnect.logs.tools.R;
 
 //TODO: manage screen rotations
 //TODO: look at attach problem when clicking on cancel
+
+/** Class: FingerprintDialog
+ *  This class loads up the dialog box and passes the cryptoobject to FingerprintUiHelper to authenticate the user
+ *  Once the user gets authenticated, onAuthenticated gets called and the LogPicker class gets called. The fingerprint
+ *  scanner gets destroyed and re-constructed when the activity gets reopened.
+ */
 public class FingerprintDialog extends DialogFragment implements FingerprintUihelper.Callback {
 
     private Button mCancelButton;

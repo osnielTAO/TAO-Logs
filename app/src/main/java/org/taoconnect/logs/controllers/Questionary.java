@@ -38,6 +38,25 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
+/** Class: Questionary
+ *  This class depends on all the Models classes, the LogPicker class and the databases.
+ *  It loads all the questions in the selected log using fragments that hold views
+ *  Each fragment loads the appropiate layout using the resources provided by the log class being used
+ *  Every time the user swipes right or left it checks to see whether the question has been properly filled.
+ *  On every swipe it stores in the temporal table
+ *  If the submit screen is reached, when the user clicks on submits it copies the temporal table row into the
+ *  permanent table and deletes the temporal table row.
+ *  If the user hits cancel, the row does not gets deleted but it rather keeps the latest update withouth writing to
+ *  the permanent table. If the user hits on the X (Close button) then it tells the user the information will be saved regardless.
+ *  It uses a FragmentPagerAdapter to keep control of the fragments being swiped and a PlaceholderFragment to
+ *  customize the creation and deletion of fragments in the log. When a new fragment gets created it gets assigned a tag to
+ *  later look for a view with that tag so that the widget within the view can be updated/saved. The PageListener keeps track
+ *  of the current motion of the user as well as the last fragment filled. The method writeToTable sends the information
+ *  saved in the private members of each logclass to the temporal or permanent database depending on whether the boolean is
+ *  false or true respectively.
+ *  GoToLastView fills all the fragments it encounters until the temporal table rows finds a null column. It gets triggered
+ *  if the action sent from LogPicker is continue.
+ */
 public class Questionary extends AppCompatActivity {
 
     private static int count;  //Number of questions

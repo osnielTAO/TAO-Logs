@@ -10,7 +10,11 @@ import android.widget.TextView;
 import org.taoconnect.logs.tools.R;
 
 /**
- * A class to manage UI changes and gives support to FingerprintDialog
+ * Class: FingerprintUiHelper
+ * This class gives the layout for fingerprint authentication and updates the icons and messages depending
+ * on where the user clicks. It only depends on resource files.
+ * Authentication happens here too. The cryptoobject is passed from FingerprintDialog and once the user gets
+ * authenticated it returns to FingerprintDialog through the callback.
  */
 
 @RequiresApi(api = Build.VERSION_CODES.M)
