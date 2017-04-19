@@ -98,7 +98,8 @@ public class LogRelaxation implements LogInterface {
 
         Cursor cursor = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_RELAX_LOG + "Temp", null);
         int rows = cursor.getCount();
-
+        cursor.close();
+        db.close();
         return (rows != 0); // Returns false if table is empty, true otherwise
     }
 

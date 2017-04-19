@@ -4,6 +4,8 @@
 
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -11,8 +13,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        >
+        android:theme="@style/AppTheme">
         <activity android:name="org.taoconnect.logs.controllers.Login">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,6 +30,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.taoconnect.logs.controllers.LogPicker" />
         </activity>
+
+        <service
+            android:name="org.taoconnect.logs.controllers.Checkremote"
+            android:exported="false"></service>
     </application>
 
 </manifest>

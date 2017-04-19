@@ -1,5 +1,6 @@
 package org.taoconnect.logs.controllers;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -61,7 +62,7 @@ import java.util.TimeZone;
  *  if the action sent from LogPicker is continue.
  */
 public class Questionary extends AppCompatActivity {
-
+    private final Context context = this;
     private static int count;  //Number of questions
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private static ViewPager mViewPager;
@@ -182,7 +183,6 @@ public class Questionary extends AppCompatActivity {
                 }
                 if(!isThere){
                     views.add(rootView);
-                    Log.e("Event", "Added " + rootView.getId());
                     int id = R.layout.submit_questionary;
                     if(action.equals("Continue") && rootView.getId() != Math.abs(id)){  // Avoid working with the last layout
                         goToLastView(log, itr);
@@ -726,7 +726,6 @@ public class Questionary extends AppCompatActivity {
             View v = views.get(itr);
             TextView header = (TextView) v.findViewById(R.id.header);
             String tag = header.getText().toString();
-            Log.e("Event", tag);
             switch (log) {
                 case "Anxiety Monitoring Log":
                     switch (tag) {
@@ -772,7 +771,6 @@ public class Questionary extends AppCompatActivity {
                         case "Thoughts, emotions, worries BEFORE relaxation:":
                             EditText entry1 = (EditText) v.findViewById(R.id.entry);
                             entry1.setText(entry);
-                            Log.e("Event", "Trying to add: " + entry);
                             break;
                         case "Anxiety Level:":
                             SeekBar progress = (SeekBar) v.findViewById(R.id.seekBar);
@@ -954,6 +952,8 @@ public class Questionary extends AppCompatActivity {
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
                 editor.putBoolean(getString(R.string.can_continue_log), false);
                 editor.apply();
+                Intent checkRemote = new Intent(context, Checkremote.class);
+                startService(checkRemote);
                 goToLogPicker();
             }
         });

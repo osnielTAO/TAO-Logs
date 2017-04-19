@@ -42,6 +42,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.taoconnect.logs.databases.InitialSchema;
 import org.taoconnect.logs.tools.ExtHttpClientStack;
 import org.taoconnect.logs.tools.R;
 import org.taoconnect.logs.tools.SslHttpClient;
@@ -136,7 +140,13 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
 
         useFingerprint = mSharedPreferences.getBoolean(getString(R.string.use_fingerprint_to_authenticate_key), false); // User wants to use fingerprint at login
         firstLogin = mSharedPreferences.getBoolean(getString(R.string.first_time_login), true);  // First time authenticating, do not allow fingerprint auth
-
+        if(firstLogin){
+            try {
+                initializeJSONString();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
 
         // If user wanted to use fingerprint then open dialog for fingerprint auth inmmediately
         if(useFingerprint)
@@ -173,6 +183,22 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
         }
     }
 
+    //TODO: Uncomment these once the whole app is using all the logs
+    private void initializeJSONString() throws JSONException {
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        JSONObject obj = new JSONObject();
+        obj.put(InitialSchema.TABLE_NAME_ANX_MON_LOG, -1);
+        obj.put(InitialSchema.TABLE_NAME_CHALLENGE_LOG, -1);
+        obj.put(InitialSchema.TABLE_NAME_EXPOSURE_LOG, -1);
+        obj.put(InitialSchema.TABLE_NAME_RELAX_LOG, -1);
+        /*obj.put(InitialSchema.TABLE_NAME_ACTIVATION_LOG, -1);
+        obj.put(InitialSchema.TABLE_NAME_FEELING_LOG, -1);
+        obj.put(InitialSchema.TABLE_NAME_LETTING_GO_LOG, -1);
+        obj.put(InitialSchema.TABLE_NAME_MINDULNESS_LOG, -1);
+        obj.put(InitialSchema.TABLE_NAME_RUMINATION_LOG, -1);*/
+        String jsonObject = obj.toString();
+        editor.putString(getString(R.string.jsonobject), jsonObject);
+    }
     // Intent that gets called after authentication through login button
     // Lets the user know it can use fingerprint if it has never seen the fingerprint dialog before and
     // hardware requirements are met (Implicitly deduced from FAB being visible), refer to line 267)

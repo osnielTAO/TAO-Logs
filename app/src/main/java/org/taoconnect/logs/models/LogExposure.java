@@ -132,6 +132,7 @@ public class LogExposure implements LogInterface {
         Cursor cursor = db.rawQuery("SELECT " + InitialSchema.TIMESTAMP + " FROM " + InitialSchema.TABLE_NAME_EXPOSURE_LOG + "Temp", null);
         cursor.moveToFirst();
         db.close();
+        cursor.close();
         return cursor.getLong(cursor.getColumnIndex(InitialSchema.TIMESTAMP));
     }
 
