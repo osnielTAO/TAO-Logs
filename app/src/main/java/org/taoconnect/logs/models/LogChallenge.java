@@ -30,6 +30,7 @@ public class LogChallenge implements LogInterface {
     private String challenges;
     private String coreBelieves;
     private String triggers;
+    private long timestamp;
     private String alternateView;
     private String[] questions = {"Date of anxiety",
             "Time of Anxiety Event",
@@ -88,6 +89,8 @@ public class LogChallenge implements LogInterface {
         values.put(InitialSchema.CHALLENGES, getChallenges());
         values.put(InitialSchema.CORE_BELIEVES, getCoreBelieves());
         values.put(InitialSchema.ALTERNATE_VIEW, getAlternateView());
+        values.put(InitialSchema.TIMESTAMP, getTimestamp());
+
 
         rowId = db.insert(InitialSchema.TABLE_NAME_CHALLENGE_LOG + "Temp ", null, values);
 
@@ -102,12 +105,22 @@ public class LogChallenge implements LogInterface {
         Cursor cursor = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_CHALLENGE_LOG + "Temp", null);
         String[] columns = cursor.getColumnNames();
         while (cursor.moveToNext()) {
-            for(int i = 1; i< columns.length; i++){
+            for(int i = 1; i< columns.length - 1; i++){
                 values.add(cursor.getString(cursor.getColumnIndex(columns[i])));
             }
         }
 
         return values;
+    }
+    @Override
+    public long getTimestampDB() {
+        MySQLiteHelper mHelper = new MySQLiteHelper(context);
+        SQLiteDatabase db = mHelper.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT " + InitialSchema.TIMESTAMP + " FROM " + InitialSchema.TABLE_NAME_CHALLENGE_LOG + "Temp", null);
+        cursor.moveToFirst();
+        db.close();
+        return cursor.getLong(cursor.getColumnIndex(InitialSchema.TIMESTAMP));
     }
 
     @Override
@@ -128,6 +141,7 @@ public class LogChallenge implements LogInterface {
         values.put(InitialSchema.CHALLENGES, getChallenges());
         values.put(InitialSchema.CORE_BELIEVES, getCoreBelieves());
         values.put(InitialSchema.ALTERNATE_VIEW, getAlternateView());
+        values.put(InitialSchema.TIMESTAMP, getTimestamp());
 
         db.insert(InitialSchema.TABLE_NAME_CHALLENGE_LOG,null,values);
         db.execSQL("DELETE FROM " + InitialSchema.TABLE_NAME_CHALLENGE_LOG + "Temp");
@@ -142,6 +156,14 @@ public class LogChallenge implements LogInterface {
         int rows = cursor.getCount();
 
         return (rows != 0); // Returns false if table is empty, true otherwise
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 
     public String getTriggers() {

@@ -83,4 +83,5 @@
     <string name="errorMessageMultiChoice">Please select something</string>
     <string name="errorMessageEntry">Please enter your response</string>
     <string name="errorMessageSingleChoice">Please select your choice</string>
+    <string name="can_continue_log">can_continue_log</string>
 </resources>

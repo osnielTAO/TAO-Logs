@@ -113,6 +113,7 @@ public class FingerprintDialog extends DialogFragment implements FingerprintUihe
     public void onAuthenticated() {
         Toast.makeText(mActivity, "Fingerprint recognized", Toast.LENGTH_SHORT).show();
         Intent login = new Intent(mActivity, LogPicker.class);
+        login.putExtra("origin", "login");
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putBoolean(getString(R.string.use_fingerprint_to_authenticate_key), mUseFingerprintFutureCheckBox.isChecked());
         editor.commit();

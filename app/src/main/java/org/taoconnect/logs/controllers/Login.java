@@ -178,6 +178,7 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
     // hardware requirements are met (Implicitly deduced from FAB being visible), refer to line 267)
     private void login(){
         final Intent login = new Intent(getApplicationContext(), LogPicker.class);
+        login.putExtra("origin", "login");
         if(!isFingerDialogShown && (mFAB.getVisibility() == View.VISIBLE)){
             AlertDialog.Builder mBuilder = new AlertDialog.Builder(context);
             mBuilder.setTitle("Login with your fingerprint!");

@@ -25,6 +25,7 @@ public class LogExposure implements LogInterface {
     private int SUDSMax;
     private int SUDSAfter;
     private int SUDSEnd;
+    private long timestamp;
     private String symptons;
     private String alternative;
     private String[] questions ={"Worry situation:",
@@ -55,7 +56,13 @@ public class LogExposure implements LogInterface {
     public LogExposure(Context context) {
         this.context = context;
     }
+    public long getTimestamp() {
+        return timestamp;
+    }
 
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
     @Override
     public void insertToTempDB() {
         MySQLiteHelper mHelper = new MySQLiteHelper(context);
@@ -71,6 +78,8 @@ public class LogExposure implements LogInterface {
         values.put(InitialSchema.SUDS_END, getSUDSEnd());
         values.put(InitialSchema.SYMPTONS_DURING, getSymptons());
         values.put(InitialSchema.ALTERNATIVE_OUTCOMES, getAlternative());
+        values.put(InitialSchema.TIMESTAMP, getTimestamp());
+
         rowId = db.insert(InitialSchema.TABLE_NAME_EXPOSURE_LOG + "Temp ", null, values);
 
         db.close();
@@ -90,6 +99,7 @@ public class LogExposure implements LogInterface {
         values.put(InitialSchema.SUDS_END, getSUDSEnd());
         values.put(InitialSchema.SYMPTONS_DURING, getSymptons());
         values.put(InitialSchema.ALTERNATIVE_OUTCOMES, getAlternative());
+        values.put(InitialSchema.TIMESTAMP, getTimestamp());
 
         db.insert(InitialSchema.TABLE_NAME_EXPOSURE_LOG,null,values);
         db.execSQL("DELETE FROM " + InitialSchema.TABLE_NAME_EXPOSURE_LOG + "Temp");
@@ -106,7 +116,7 @@ public class LogExposure implements LogInterface {
         Cursor cursor = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_EXPOSURE_LOG + "Temp", null);
         String[] columns = cursor.getColumnNames();
         while (cursor.moveToNext()) {
-            for(int i = 1; i< columns.length; i++){
+            for(int i = 1; i< columns.length - 1; i++){
                 values.add(cursor.getString(cursor.getColumnIndex(columns[i])));
             }
         }
@@ -114,6 +124,16 @@ public class LogExposure implements LogInterface {
         return values;
     }
 
+    @Override
+    public long getTimestampDB() {
+        MySQLiteHelper mHelper = new MySQLiteHelper(context);
+        SQLiteDatabase db = mHelper.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT " + InitialSchema.TIMESTAMP + " FROM " + InitialSchema.TABLE_NAME_EXPOSURE_LOG + "Temp", null);
+        cursor.moveToFirst();
+        db.close();
+        return cursor.getLong(cursor.getColumnIndex(InitialSchema.TIMESTAMP));
+    }
 
     @Override
     public boolean hasTempTable(){

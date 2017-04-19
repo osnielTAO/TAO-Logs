@@ -1,7 +1,5 @@
 package org.taoconnect.logs.models;
 
-import android.database.sqlite.SQLiteDatabase;
-
 import java.util.ArrayList;
 
 /**
@@ -15,4 +13,5 @@ interface LogInterface {
     void insertToPermanentDB();
     boolean hasTempTable(); // Used to add the continue option in LogPicker
     ArrayList<String> getColValues(); // Gets the values from the temp table to fill out the views when continue gets called
+    long getTimestampDB(); // Gets the timestamp from the temporal table
 }

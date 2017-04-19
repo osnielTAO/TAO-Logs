@@ -35,8 +35,11 @@ import org.taoconnect.logs.models.LogRelaxation;
 import org.taoconnect.logs.tools.R;
 
 import java.lang.reflect.Array;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 /** Class: Questionary
  *  This class depends on all the Models classes, the LogPicker class and the databases.
@@ -71,6 +74,7 @@ public class Questionary extends AppCompatActivity {
     private static int[] layouts;
     private static String[] headers;
     private static List<View> views = new ArrayList<View>();      // Holds all the view objects for every fragment created
+    private SharedPreferences mSharedPreferences;
     private static int itr = 0;
     private static int prevPos=0;
     private static boolean movingLeft = false;
@@ -207,11 +211,43 @@ public class Questionary extends AppCompatActivity {
         count = extras.getInt("Count");     // Total number of questions
         log = extras.getString("Log");
         action = extras.getString("Action");
+
         createLogClass(log);
 
+        // This has to wait for the log class to be instantiated
+        if(action.equals("Continue")){
+            long timestamp = 0;
+            switch(log){
+                case "Anxiety Monitoring Log": timestamp  = logAnxiety.getTimestampDB();
+                    break;
+                case "Relaxation Log": timestamp = logRelaxation.getTimestampDB();
+                    break;
+                case "Challenge Log": timestamp = logChallenge.getTimestampDB();
+                    break;
+                case "Exposure Log": timestamp = logExposure.getTimestampDB();
+                    break;
+                case "Feeling Log":
+                case "Activation Plan":
+                case "Rumination Record":
+                case "Letting Go Exercise Log":
+                case "Mindfulness Log":
+                case "Anxiety Logs":
+                case "Behavioral Activation":
+                case "Acceptance and Commitment Therapy":
+                case "Cognitive Behavioral":
+                    break;
+            }
+            Date date = new Date(timestamp*1000L);
+            SimpleDateFormat mFormater = new SimpleDateFormat("MM-dd-yyyy hh:mm");
+            //mFormater.setTimeZone(TimeZone.getDefault());
+            String formattedDate = mFormater.format(date);
+            Toast.makeText(this,"Entry started " + formattedDate, Toast.LENGTH_LONG).show();
+        }
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+        mSharedPreferences =  PreferenceManager.getDefaultSharedPreferences(this);
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
@@ -229,6 +265,12 @@ public class Questionary extends AppCompatActivity {
                     // Don't save if action is continue. I am manually swiping to fill in the views, writing here in that case overrides the
                     // table values necessary to fill the views.
                     writeToTable(false);
+                    SharedPreferences.Editor editor = mSharedPreferences.edit();
+                    editor.putBoolean(getString(R.string.can_continue_log), true);
+                    editor.putString("Log", log);
+                    editor.putInt("Count", count);
+                    editor.apply();
+
                 }
 
                 if(prevPos>itr){
@@ -420,8 +462,11 @@ public class Questionary extends AppCompatActivity {
         TextView text = (TextView) v.findViewById(R.id.header);
         String tag = text.getText().toString();
 
+        long timestamp = System.currentTimeMillis()/1000L;
+
         switch(log){
             case "Anxiety Monitoring Log":
+                logAnxiety.setTimestamp(timestamp);
                 switch(tag){
                     case "Date of anxiety":
                         DatePicker datePicker = (DatePicker) v.findViewById(R.id.datePicker);
@@ -466,6 +511,7 @@ public class Questionary extends AppCompatActivity {
                 }
                 break;
             case "Relaxation Log":
+                logRelaxation.setTimestamp(timestamp);
                 switch(tag){
                     case "Thoughts, emotions, worries BEFORE relaxation:":
                         EditText entry1 = (EditText) v.findViewById(R.id.entry);
@@ -487,6 +533,7 @@ public class Questionary extends AppCompatActivity {
                 }
                 break;
             case "Challenge Log":
+                logChallenge.setTimestamp(timestamp);
                 switch(tag){
                     case "Date of anxiety":
                         DatePicker datePicker = (DatePicker) v.findViewById(R.id.datePicker);
@@ -563,6 +610,7 @@ public class Questionary extends AppCompatActivity {
                 }
                 break;
             case "Exposure Log":
+                logExposure.setTimestamp(timestamp);
                 switch(tag){
                     case "Worry situation:":
                         EditText entry1 = (EditText) v.findViewById(R.id.entry);
@@ -902,10 +950,10 @@ public class Questionary extends AppCompatActivity {
         mBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
-                editor.putBoolean(getString(R.string.saved_log), false);
-                editor.apply();
                 writeToTable(true);
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+                editor.putBoolean(getString(R.string.can_continue_log), false);
+                editor.apply();
                 goToLogPicker();
             }
         });
@@ -918,7 +966,6 @@ public class Questionary extends AppCompatActivity {
         });
         AlertDialog mDialog = mBuilder.create();
         mDialog.show();
-        writeToTable(true);
     }
 
     // Cancel button listener
@@ -934,7 +981,9 @@ public class Questionary extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
-                editor.putBoolean(getString(R.string.saved_log), true);
+                editor.putBoolean(getString(R.string.can_continue_log), true);
+                editor.putString("Log", log);
+                editor.putInt("Count", count);
                 editor.apply();
                 writeToTable(false);
                 goToLogPicker();
@@ -953,6 +1002,7 @@ public class Questionary extends AppCompatActivity {
     // Shuts down this activity and moves to LogPicker
     private void goToLogPicker(){
         Intent close = new Intent(this, LogPicker.class);
+        close.putExtra("origin", "logpicker");
         close.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         views.clear();
         startActivity(close);

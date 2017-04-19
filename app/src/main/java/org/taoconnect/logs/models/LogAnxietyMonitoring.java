@@ -27,6 +27,7 @@ public class LogAnxietyMonitoring implements LogInterface {
     private String triggers;
     private String actionTaken;
     private String outcome;
+    private long timestamp;
     private Context context;
     private String[] questions = {"Date of anxiety",
                                   "Time of Anxiety Event",
@@ -44,6 +45,14 @@ public class LogAnxietyMonitoring implements LogInterface {
             R.layout.short_response_questionary,
             R.layout.short_response_questionary,
             R.layout.short_response_questionary};
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
 
     public int[] getResources() {
         return resources;
@@ -72,6 +81,7 @@ public class LogAnxietyMonitoring implements LogInterface {
         values.put(InitialSchema.TRIGGERS, getTriggers());
         values.put(InitialSchema.ACTION_TAKEN, getActionTaken());
         values.put(InitialSchema.OUTCOME, getOutcome());
+        values.put(InitialSchema.TIMESTAMP, getTimestamp());
 
         rowId = db.replace(InitialSchema.TABLE_NAME_ANX_MON_LOG + "Temp ", null, values);
         db.close();
@@ -86,13 +96,26 @@ public class LogAnxietyMonitoring implements LogInterface {
         Cursor cursor = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_ANX_MON_LOG + "Temp", null);
         String[] columns = cursor.getColumnNames();
         while (cursor.moveToNext()) {
-            for(int i = 1; i< columns.length; i++){
+            for(int i = 1; i< columns.length - 1; i++){
                 values.add(cursor.getString(cursor.getColumnIndex(columns[i])));
             }
         }
 
         return values;
     }
+
+    @Override
+    public long getTimestampDB() {
+        MySQLiteHelper mHelper = new MySQLiteHelper(context);
+        SQLiteDatabase db = mHelper.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT " + InitialSchema.TIMESTAMP + " FROM " + InitialSchema.TABLE_NAME_ANX_MON_LOG + "Temp", null);
+        cursor.moveToFirst();
+        db.close();
+        return cursor.getLong(cursor.getColumnIndex(InitialSchema.TIMESTAMP));
+
+    }
+
     @Override
     public void insertToPermanentDB(){
         MySQLiteHelper mHelper = new MySQLiteHelper(context);
@@ -107,6 +130,7 @@ public class LogAnxietyMonitoring implements LogInterface {
         values.put(InitialSchema.TRIGGERS, getTriggers());
         values.put(InitialSchema.ACTION_TAKEN, getActionTaken());
         values.put(InitialSchema.OUTCOME, getOutcome());
+        values.put(InitialSchema.TIMESTAMP, getTimestamp());
 
         db.insert(InitialSchema.TABLE_NAME_ANX_MON_LOG,null,values);
         db.execSQL("DELETE FROM " + InitialSchema.TABLE_NAME_ANX_MON_LOG + "Temp");

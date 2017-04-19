@@ -52,6 +52,24 @@ public class LogPicker extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_picker);
 
+        Intent received = getIntent();
+        Bundle extras = received.getExtras();
+        String origin = extras.getString("origin");
+
+        if(origin.equals("login")){
+            SharedPreferences mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            boolean hasSavedLog = mSharedPreferences.getBoolean(getString(R.string.can_continue_log),false);
+            String logClass = mSharedPreferences.getString("Log", "Relaxation Log");
+            int questions = mSharedPreferences.getInt("Count", 4);
+            if(hasSavedLog){
+                Intent jumpToQuestionary = new Intent(this, Questionary.class);
+                jumpToQuestionary.putExtra("Log", logClass);
+                jumpToQuestionary.putExtra("Count", questions);
+                jumpToQuestionary.putExtra("Action", "Continue");
+                startActivity(jumpToQuestionary);
+            }
+
+        }
         loadSpinners();
 
     }

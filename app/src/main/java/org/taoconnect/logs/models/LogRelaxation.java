@@ -47,6 +47,7 @@ public class LogRelaxation implements LogInterface {
     private String thoughts;
     private String relaxationExercise;
     private int anxietyLevel;
+    private long timestamp;
     private String tableName = InitialSchema.TABLE_NAME_RELAX_LOG;
     private String[] questions = {"Thoughts, emotions, worries BEFORE relaxation:",
             "Anxiety Level:",
@@ -63,7 +64,13 @@ public class LogRelaxation implements LogInterface {
     public String[] getQuestions() {
         return questions;
     }
+    public long getTimestamp() {
+        return timestamp;
+    }
 
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
     public LogRelaxation(Context context) {
         this.context = context;
     }
@@ -77,7 +84,7 @@ public class LogRelaxation implements LogInterface {
         Cursor cursor = db.rawQuery("SELECT * FROM " + InitialSchema.TABLE_NAME_RELAX_LOG + "Temp", null);
         String[] columns = cursor.getColumnNames();
         while (cursor.moveToNext()) {
-            for(int i = 1; i< columns.length; i++){
+            for(int i = 1; i< columns.length - 1; i++){
                 values.add(cursor.getString(cursor.getColumnIndex(columns[i])));
             }
         }
@@ -94,6 +101,18 @@ public class LogRelaxation implements LogInterface {
 
         return (rows != 0); // Returns false if table is empty, true otherwise
     }
+
+    @Override
+    public long getTimestampDB() {
+        MySQLiteHelper mHelper = new MySQLiteHelper(context);
+        SQLiteDatabase db = mHelper.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT " + InitialSchema.TIMESTAMP + " FROM " + InitialSchema.TABLE_NAME_RELAX_LOG + "Temp", null);
+        cursor.moveToFirst();
+        db.close();
+        return cursor.getLong(cursor.getColumnIndex(InitialSchema.TIMESTAMP));
+    }
+
     @Override
     public void insertToTempDB() {
         MySQLiteHelper mHelper = new MySQLiteHelper(context);
@@ -104,6 +123,7 @@ public class LogRelaxation implements LogInterface {
         values.put(InitialSchema.THOUGHTS_BEFORE, getThoughts());
         values.put(InitialSchema.RELAXATION_EXERCISE, getRelaxationExercise());
         values.put(InitialSchema.ANXIETY_LEVEL, getAnxietyLevel());
+        values.put(InitialSchema.TIMESTAMP, getTimestamp());
 
         rowId = db.replace(InitialSchema.TABLE_NAME_RELAX_LOG + "Temp ", null, values);
         db.close();
@@ -118,6 +138,7 @@ public class LogRelaxation implements LogInterface {
         values.put(InitialSchema.THOUGHTS_BEFORE, getThoughts());
         values.put(InitialSchema.RELAXATION_EXERCISE, getRelaxationExercise());
         values.put(InitialSchema.ANXIETY_LEVEL, getAnxietyLevel());
+        values.put(InitialSchema.TIMESTAMP, getTimestamp());
 
         db.insert(InitialSchema.TABLE_NAME_RELAX_LOG,null,values);
         db.execSQL("DELETE FROM " + InitialSchema.TABLE_NAME_RELAX_LOG + "Temp");
