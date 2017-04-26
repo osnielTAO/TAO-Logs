@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
 import org.taoconnect.logs.tools.R;
 
 //TODO: manage screen rotations

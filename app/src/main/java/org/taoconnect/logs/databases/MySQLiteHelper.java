@@ -19,8 +19,8 @@ public final class MySQLiteHelper extends SQLiteOpenHelper {
 
         // If you change the database schema, you must increment the database version.
    // private FeedReaderDbHelper mHelper = new FeedReaderDbHelper(getContext());
-    public static final int DATABASE_VERSION = 14;
-    public static final String DATABASE_NAME = "14.db";
+    public static final int DATABASE_VERSION = 19;
+    public static final String DATABASE_NAME = "19.db";
 
     public MySQLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

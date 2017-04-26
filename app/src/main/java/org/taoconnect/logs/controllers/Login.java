@@ -184,7 +184,7 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
     }
 
     //TODO: Uncomment these once the whole app is using all the logs
-    private void initializeJSONString() throws JSONException {
+    public void initializeJSONString() throws JSONException {
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         JSONObject obj = new JSONObject();
         obj.put(InitialSchema.TABLE_NAME_ANX_MON_LOG, -1);
@@ -197,7 +197,9 @@ public class Login extends AppCompatActivity implements ActivityCompat.OnRequest
         obj.put(InitialSchema.TABLE_NAME_MINDULNESS_LOG, -1);
         obj.put(InitialSchema.TABLE_NAME_RUMINATION_LOG, -1);*/
         String jsonObject = obj.toString();
+        Log.e("Event", "Added to shared preferences " + jsonObject);
         editor.putString(getString(R.string.jsonobject), jsonObject);
+        editor.apply();
     }
     // Intent that gets called after authentication through login button
     // Lets the user know it can use fingerprint if it has never seen the fingerprint dialog before and

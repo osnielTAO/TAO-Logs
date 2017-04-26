@@ -139,4 +139,6 @@ public class InitialSchema implements BaseColumns {
     public static final String TABLE_NAME_LETTING_GO_LOG = "lettingGoLog";
 
     public static final String TABLE_NAME_MINDULNESS_LOG = "mindfulnessLog";
+
+    public static final String TABLE_NAME_RELAXATIONBEH_LOG = "relaxationBehLog";
 }
